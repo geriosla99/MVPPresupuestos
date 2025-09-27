@@ -1,0 +1,186 @@
+/* --- General Styles --- */
+body {
+    background: #f4f6f8;
+    font-family: Arial, sans-serif;
+}
+
+/* --- Headings --- */
+h1, h2 {
+    color: #2980b9;
+    margin-bottom: 18px;
+}
+
+h2 {
+    text-align: center;
+}
+
+/* --- Paragraph --- */
+p {
+    color: #34495e;
+    margin-bottom: 28px;
+    font-size: 18px;
+}
+
+/* --- Login Styles --- */
+.login-container {
+    max-width: 400px;
+    margin: 60px auto;
+    background: #fff;
+    padding: 32px 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.login-container h2 {
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    color: #34495e;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #dfe6e9;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #2471a3;
+}
+
+.extra-links {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.extra-links a {
+    color: #2980b9;
+    text-decoration: none;
+    margin: 0 8px;
+}
+
+.extra-links a:hover {
+    text-decoration: underline;
+}
+
+/* --- Dashboard Styles --- */
+.dashboard-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 36px 28px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.summary {
+    margin-bottom: 24px;
+    color: #34495e;
+    font-size: 17px;
+}
+
+.actions {
+    margin-bottom: 24px;
+    text-align: right;
+}
+
+.actions a {
+    background: #27ae60;
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 15px;
+    transition: background 0.2s;
+}
+
+.actions a:hover {
+    background: #219150;
+}
+
+/* --- Table Styles --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th,
+td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #dfe6e9;
+    text-align: left;
+}
+
+th {
+    background: #f4f6f8;
+}
+
+tr:hover {
+    background: #f0f3f6;
+}
+
+/* --- Status Styles --- */
+.status-aprobado {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.status-pendiente {
+    color: #f39c12;
+    font-weight: bold;
+}
+
+.status-rechazado {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* --- Main Container Styles --- */
+.main-container {
+    max-width: 600px;
+    margin: 60px auto;
+    background: #fff;
+    padding: 40px 32px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.main-actions a {
+    display: inline-block;
+    margin: 0 12px;
+    padding: 12px 28px;
+    background: #2980b9;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background 0.2s;
+}
+
+.main-actions a:hover {
+    background: #2471a3;
+}

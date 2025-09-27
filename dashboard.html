@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | Presupuesto Personal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/styles/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <h2>Panel de Presupuesto Personal</h2>
+        <div class="summary">
+            Bienvenido, aquí puedes registrar tus <b>ingresos</b> y <b>gastos</b> personales.<br>
+            Lleva el control de tus finanzas y visualiza cuánto ahorras cada mes.
+        </div>
+        <div class="justify-content-around mb-3 d-flex ">
+        <button type="button" class="btn btn-success mx-2" data-bs-toggle="modal" data-bs-target="#modalPresupuesto">
+            Crear Presupuesto
+        </button>
+        <button class="btn btn-info mx-2" id="descargarExcel">📥 Exportar a Excel</button>
+
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Categoría</th>
+                    <th>Fecha</th>
+                    <th>Monto</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="transaction-table">
+
+            </tbody>
+        </table>
+    </div>
+    <div class="modal fade" id="modalPresupuesto" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo Presupuesto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Nombre y fecha -->
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del presupuesto</label>
+                        <input type="text" id="nombrePresupuesto" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Fecha</label>
+                        <input type="date" id="fechaPresupuesto" class="form-control">
+                    </div>
+
+                    <!-- Tabla de ítems -->
+                    <h6>Ítems</h6>
+                    <table class="table table-bordered" id="tablaItems">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Monto</th>
+                                <th>Tipo</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <button type="button" class="btn btn-success" id="agregarItem">+ Agregar Ítem</button>
+
+                    <!-- Total -->
+                    <div class="mt-3">
+                        <strong>Total: $<span id="totalPresupuesto">0</span></strong>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="guardarPresupuesto">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VER -->
+<div class="modal fade" id="modalVer" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle del Presupuesto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Nombre:</strong> <span id="verNombre"></span></p>
+        <p><strong>Fecha:</strong> <span id="verFecha"></span></p>
+        <h6>Ítems</h6>
+        <ul id="verItems"></ul>
+        <p><strong>Total:</strong> $<span id="verTotal"></span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Presupuesto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nombre del presupuesto</label>
+          <input type="text" id="editarNombre" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Fecha</label>
+          <input type="date" id="editarFecha" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Total</label>
+          <input type="number" id="editarTotal" class="form-control" disabled>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="guardarEdicion">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ELIMINAR -->
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Seguro que deseas eliminar este presupuesto?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmarEliminar">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Bootstrap JS (bundle con Popper incluido) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="../static/script/presupuesto.js"></script>
+</body>
+
+</html>
