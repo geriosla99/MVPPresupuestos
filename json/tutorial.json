@@ -1,0 +1,60 @@
+[
+    {
+      "paso": 1,
+      "accion": "Abrir el dashboard",
+      "descripcion": "El usuario ingresa a la página principal y visualiza el panel de presupuestos personales."
+    },
+    {
+      "paso": 2,
+      "accion": "Crear un nuevo presupuesto",
+      "descripcion": "Haz clic en el botón 'Crear Presupuesto'.",
+      "resultado": "Se abre un modal con un formulario para ingresar nombre, fecha e ítems."
+    },
+    {
+      "paso": 3,
+      "accion": "Agregar ítems",
+      "descripcion": "En el modal, presiona el botón '+ Agregar Ítem' para añadir ingresos o gastos.",
+      "detalle": {
+        "inputs": {
+          "descripcion": "Ejemplo: 'Supermercado'",
+          "monto": "Ejemplo: 500000"
+        }
+      }
+    },
+    {
+      "paso": 4,
+      "accion": "Calcular total",
+      "descripcion": "El sistema suma automáticamente los montos ingresados.",
+      "resultado": "Se muestra el total en la parte inferior del modal."
+    },
+    {
+      "paso": 5,
+      "accion": "Guardar presupuesto",
+      "descripcion": "Presiona el botón 'Guardar'.",
+      "resultado": "El presupuesto queda almacenado en el LocalStorage y aparece en la tabla del dashboard."
+    },
+    {
+      "paso": 6,
+      "accion": "Ver un presupuesto",
+      "descripcion": "En la tabla, presiona el botón 'Ver' del presupuesto deseado.",
+      "resultado": "Se abre un modal mostrando los detalles completos."
+    },
+    {
+      "paso": 7,
+      "accion": "Editar un presupuesto",
+      "descripcion": "Presiona el botón 'Editar'.",
+      "resultado": "Se abre el modal con la información cargada para modificar y actualizar."
+    },
+    {
+      "paso": 8,
+      "accion": "Eliminar un presupuesto",
+      "descripcion": "Presiona el botón 'Eliminar'.",
+      "resultado": "El presupuesto seleccionado se borra del LocalStorage y desaparece de la tabla."
+    },
+    {
+      "paso": 9,
+      "accion": "Exportar a Excel",
+      "descripcion": "Haz clic en el botón 'Exportar Excel'.",
+      "resultado": "Se descarga un archivo .xlsx con el detalle de todos los presupuestos."
+    }
+  ]
