@@ -35,7 +35,7 @@
     },
     {
       title: "¡Listo!",
-      html: `<p>Ya sabes lo básico. Si quieres ver esta guía otra vez, puedes borrarla del LocalStorage o usar el botón de ayuda (si lo añades).</p>
+      html: `<p>Ya sabes lo básico. Si quieres ver esta guía otra vez, puedes borrarla del LocalStorage o usar el botón de ayuda (si lo añades).</p>}`
     }
   ];
 
