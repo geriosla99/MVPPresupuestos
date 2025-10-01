@@ -198,6 +198,31 @@ document.getElementById("descargarExcel").addEventListener("click", () => {
 
   const wb = XLSX.utils.book_new();
 
+  // 1) Hoja general con la tabla completa + detalle de ítems
+  const resumen = [["Presupuesto", "Fecha", "Tipo", "Descripción", "Monto", "Total Presupuesto"]];
+  
+  data.forEach(presupuesto => {
+    if (presupuesto.items && presupuesto.items.length > 0) {
+      presupuesto.items.forEach((item, idx) => {
+        resumen.push([
+          idx === 0 ? presupuesto.nombre : "", // solo mostramos nombre en la primera fila
+          idx === 0 ? presupuesto.fecha : "",
+          idx === 0 ? presupuesto.tipo : "",
+          item.descripcion,
+          item.monto,
+          idx === 0 ? presupuesto.total : "" // total solo en la primera fila
+        ]);
+      });
+    } else {
+      // si no tiene items, igual se registra
+      resumen.push([presupuesto.nombre, presupuesto.fecha, presupuesto.tipo, "-", 0, presupuesto.total]);
+    }
+  });
+
+  const wsResumen = XLSX.utils.aoa_to_sheet(resumen);
+  XLSX.utils.book_append_sheet(wb, wsResumen, "Resumen");
+
+  // 2) Hojas detalladas de cada presupuesto
   data.forEach((presupuesto, index) => {
     const rows = [
       ["Nombre del Presupuesto", presupuesto.nombre],
@@ -215,11 +240,13 @@ document.getElementById("descargarExcel").addEventListener("click", () => {
     rows.push(["TOTAL", presupuesto.total]);
 
     const ws = XLSX.utils.aoa_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, presupuesto.nombre || `Presupuesto${index+1}`);
+    XLSX.utils.book_append_sheet(wb, ws, presupuesto.nombre || `Presupuesto${index + 1}`);
   });
 
+  // Descargar archivo
   XLSX.writeFile(wb, "presupuestos_detallados.xlsx");
 });
+
 // Abrir modal simulador
 document.getElementById("simularAhorro").addEventListener("click", () => {
   const modal = new bootstrap.Modal(document.getElementById("simuladorModal"));
