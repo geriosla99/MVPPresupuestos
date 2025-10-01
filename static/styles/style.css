@@ -251,3 +251,99 @@ tr:hover {
   margin: 5px 0;
   font-size: 16px;
 }
+/* Layout general */
+.layout-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  min-height: 100vh;
+  flex-wrap: wrap; /* permite que los bloques bajen en pantallas pequeñas */
+}
+
+/* Sidebar izquierdo y derecho */
+.sidebar {
+  width: 220px;
+  background: #f8f9fa;
+  padding: 20px;
+  border: 1px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+/* Dashboard principal */
+.dashboard-container {
+  flex: 1;
+  margin: 20px;
+  min-width: 300px;
+}
+
+/* --- Responsividad --- */
+@media (max-width: 992px) {
+  .layout-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .sidebar {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .dashboard-container {
+    margin: 10px;
+    width: 100%;
+  }
+
+  table {
+    font-size: 14px;
+  }
+
+  th, td {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  h2 {
+    font-size: 20px;
+  }
+
+  .financial-summary {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  table, thead, tbody, th, td, tr {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none; /* ocultamos encabezados en móviles */
+  }
+
+  tr {
+    margin-bottom: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 10px;
+  }
+
+  td {
+    text-align: right;
+    position: relative;
+    padding-left: 50%;
+  }
+
+  td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    font-weight: bold;
+    color: #495057;
+    text-align: left;
+  }
+}

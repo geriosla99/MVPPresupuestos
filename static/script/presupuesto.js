@@ -82,14 +82,14 @@ function mostrarPresupuestos() {
         const fila = document.createElement("tr");
         fila.innerHTML = `
           <td>${index + 1}</td>
-          <td>${p.nombre}</td>
-          <td>${p.fecha}</td>
-          <td>${p.tipo}</td>
-          <td>$${p.total.toFixed(2)}</td>
-          <td class="justify-content-around mb-3 d-flex ">
-              <button class="btn btn-primary btn-sm" onclick="verElemento(${index})">Ver</button>
-              <button class="btn btn-warning btn-sm mx-3" onclick="editarElemento(${index})">Editar</button>
-              <button class="btn btn-danger btn-sm" onclick="eliminarElemento(${index})">Eliminar</button>
+          <td data-label="Categoría">${p.nombre}</td>
+          <td data-label="Fecha">${p.fecha}</td>
+          <td data-label="Tipo">${p.tipo}</td>
+          <td data-label="Monto">$${p.total.toFixed(2)}</td>
+          <td class="row g-2" data-label="Acciones">
+              <button class="btn btn-primary btn-sm col-4" onclick="verElemento(${index})">Ver</button>
+              <button class="btn btn-warning btn-sm col-4" onclick="editarElemento(${index})">Editar</button>
+              <button class="btn btn-danger btn-sm col-4" onclick="eliminarElemento(${index})">Eliminar</button>
           </td>
         `;
         tbody.appendChild(fila);
