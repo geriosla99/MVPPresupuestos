@@ -24,7 +24,7 @@
         Lleva el control de tus finanzas y visualiza cuánto ahorras cada mes.
       </div>
       <div class="justify-content-around mb-3 d-flex ">
-        <button type="button" class="btn btn-success mx-2" data-bs-toggle="modal" data-bs-target="#simuladorModal">
+        <button type="button" class="btn btn-success mx-2" data-bs-toggle="modal" data-bs-target="#modalPresupuesto">
           Crear Presupuesto
         </button>
         <button class="btn btn-info mx-2" id="descargarExcel">📥 Exportar a Excel</button>
@@ -225,25 +225,10 @@
             <input type="number" id="metaAhorro" class="form-control">
           </div>
 
-          <div class="mb-3">
-            <label for="modoSimulador" class="form-label">Quiero calcular por:</label>
-            <select id="modoSimulador" class="form-select">
-              <option value="">Seleccione aquí</option>
-              <option value="meses">Meta + meses</option>
-              <option value="ahorroMensual">Meta + ahorro mensual</option>
-            </select>
-          </div>
-
           <!-- Campo si elige calcular por meses -->
           <div id="campoMeses" class="mb-3">
             <label for="mesesDeseados" class="form-label">Meses</label>
             <input type="number" id="mesesDeseados" class="form-control">
-          </div>
-
-          <!-- Campo si elige calcular por ahorro mensual -->
-          <div id="campoAhorroMensual" class="mb-3" style="display:none;">
-            <label for="ahorroMensual" class="form-label">Ahorro mensual ($)</label>
-            <input type="number" id="ahorroMensual" class="form-control">
           </div>
 
           <div id="resultadoSimulador" class="alert alert-info mt-3"></div>

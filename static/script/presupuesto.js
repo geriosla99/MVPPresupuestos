@@ -87,9 +87,9 @@ function mostrarPresupuestos() {
           <td data-label="Tipo">${p.tipo}</td>
           <td data-label="Monto">$${p.total.toFixed(2)}</td>
           <td class="row g-2" data-label="Acciones">
-              <button class="btn btn-primary btn-sm col-4" onclick="verElemento(${index})">Ver</button>
-              <button class="btn btn-warning btn-sm col-4" onclick="editarElemento(${index})">Editar</button>
-              <button class="btn btn-danger btn-sm col-4" onclick="eliminarElemento(${index})">Eliminar</button>
+              <button class="btn btn-primary btn-sm col-md-3" onclick="verElemento(${index})">Ver</button>
+              <button class="btn btn-warning btn-sm mx-3 col-md-3" onclick="editarElemento(${index})">Editar</button>
+              <button class="btn btn-danger btn-sm col-md-3" onclick="eliminarElemento(${index})">Eliminar</button>
           </td>
         `;
         tbody.appendChild(fila);
@@ -252,16 +252,18 @@ document.getElementById("simularAhorro").addEventListener("click", () => {
   const modal = new bootstrap.Modal(document.getElementById("simuladorModal"));
   modal.show();
 });
-
-// Mostrar campos según modo
-document.getElementById("modoSimulador").addEventListener("change", (e) => {
-  const modo = e.target.value;
-  document.getElementById("campoMeses").style.display = (modo === "meses") ? "block" : "none";
-  document.getElementById("campoAhorroMensual").style.display = (modo === "ahorroMensual") ? "block" : "none";
-});
-
 // Calcular simulación
 document.getElementById("calcularSimulador").addEventListener("click", () => {
+  const tabla = document.getElementById("transaction-table");
+  const filas = tabla.querySelectorAll("tr");
+
+  // ✅ Validar si la tabla está vacía
+  if (filas.length === 0) {
+    document.getElementById("resultadoSimulador").textContent =
+      "⚠️ No tienes registros en tu presupuesto. Agrega ingresos y gastos antes de simular.";
+    return;
+  }
+
   const meta = parseFloat(document.getElementById("metaAhorro").value) || 0;
   const ingresos = parseFloat(document.getElementById("totalIngresos").textContent.replace(/\D/g, "")) || 0;
   const gastos = parseFloat(document.getElementById("totalGastos").textContent.replace(/\D/g, "")) || 0;
@@ -311,5 +313,7 @@ document.getElementById("calcularSimulador").addEventListener("click", () => {
 
     document.getElementById("resultadoSimulador").textContent =
       `✅ Con un ahorro mensual de $${ahorroMensualDeseado.toLocaleString()}, alcanzarás tu meta de $${meta.toLocaleString()} en aproximadamente ${meses} meses.`;
+  } else {
+    alert("⚠️ Selecciona un modo de simulación.");
   }
 });
