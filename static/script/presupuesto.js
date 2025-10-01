@@ -32,9 +32,9 @@ function actualizarTotal() {
 document.getElementById("guardarPresupuesto").addEventListener("click", () => {
     const nombre = document.getElementById("nombrePresupuesto").value;
     const fecha = document.getElementById("fechaPresupuesto").value;
-    const tipo = document.getElementsByClassName("tipoPresupuesto").value;
+    const tipo = document.getElementById("tipoPresupuesto").value; // select
     const items = [];
-    console.log(tipo);
+
     document.querySelectorAll("#tablaItems tbody tr").forEach(fila => {
         const descripcion = fila.querySelector(".descripcion").value;
         const monto = parseFloat(fila.querySelector(".monto").value) || 0;
@@ -43,12 +43,13 @@ document.getElementById("guardarPresupuesto").addEventListener("click", () => {
         }
     });
 
-    if (!nombre || !fecha || items.length === 0) {
+    if (!nombre || !fecha || !tipo || items.length === 0) {
         alert("⚠️ Completa todos los campos y agrega al menos un ítem.");
         return;
     }
 
-    const presupuesto = { nombre, fecha, items, total };
+    // Guardamos también el tipo
+    const presupuesto = { nombre, fecha, tipo, items, total };
 
     let presupuestos = JSON.parse(localStorage.getItem("presupuestos")) || [];
     presupuestos.push(presupuesto);
@@ -59,10 +60,12 @@ document.getElementById("guardarPresupuesto").addEventListener("click", () => {
     // Reiniciar formulario
     document.getElementById("nombrePresupuesto").value = "";
     document.getElementById("fechaPresupuesto").value = "";
+    document.getElementById("tipoPresupuesto").value = "";
     document.querySelector("#tablaItems tbody").innerHTML = "";
     document.getElementById("totalPresupuesto").textContent = "0.00";
 
     mostrarPresupuestos();
+    actualizarResumen();
 
     // Cerrar modal
     const modal = bootstrap.Modal.getInstance(document.getElementById("modalPresupuesto"));
@@ -76,36 +79,63 @@ function mostrarPresupuestos() {
     tbody.innerHTML = "";
 
     presupuestos.forEach((p, index) => {
-        console.log(p, index);
         const fila = document.createElement("tr");
         fila.innerHTML = `
           <td>${index + 1}</td>
           <td>${p.nombre}</td>
           <td>${p.fecha}</td>
+          <td>${p.tipo}</td>
           <td>$${p.total.toFixed(2)}</td>
-        <td class="justify-content-around mb-3 d-flex ">
-            <button class="btn btn-primary btn-sm " onclick="verElemento(${index})">Ver</button>
-            <button class="btn btn-warning btn-sm mx-3" onclick="editarElemento(${index})">Editar</button>
-            <button class="btn btn-danger btn-sm" onclick="eliminarElemento(${index})">Eliminar</button>
-        </td>
+          <td class="justify-content-around mb-3 d-flex ">
+              <button class="btn btn-primary btn-sm" onclick="verElemento(${index})">Ver</button>
+              <button class="btn btn-warning btn-sm mx-3" onclick="editarElemento(${index})">Editar</button>
+              <button class="btn btn-danger btn-sm" onclick="eliminarElemento(${index})">Eliminar</button>
+          </td>
         `;
         tbody.appendChild(fila);
     });
 }
 
+// Resumen financiero
+function actualizarResumen() {
+  let ingresos = 0;
+  let gastos = 0;
+
+  const presupuestos = JSON.parse(localStorage.getItem("presupuestos")) || [];
+
+  presupuestos.forEach(p => {
+    if (p.tipo === "ingreso") {
+      ingresos += p.total || 0;
+    } else if (p.tipo === "gasto") {
+      gastos += p.total || 0;
+    }
+  });
+
+  const ahorro = ingresos - gastos;
+
+  document.getElementById("totalIngresos").textContent = ingresos.toLocaleString();
+  document.getElementById("totalGastos").textContent = gastos.toLocaleString();
+  document.getElementById("totalAhorro").textContent = ahorro.toLocaleString();
+}
+
 // Al cargar
-window.addEventListener("DOMContentLoaded", mostrarPresupuestos);
+window.addEventListener("DOMContentLoaded",()=>{
+  mostrarPresupuestos();
+  actualizarResumen();
+});
 
 let presupuestoSeleccionado = null;
 
 // VER
 function verElemento(index) {
+  console.log("Ver elemento en índice:", index);
   const presupuestos = JSON.parse(localStorage.getItem("presupuestos")) || [];
   const p = presupuestos[index];
   presupuestoSeleccionado = index;
-
+  console.log("Presupuesto seleccionado:", p);
   document.getElementById("verNombre").textContent = p.nombre;
   document.getElementById("verFecha").textContent = p.fecha;
+  document.getElementById("verTipo").textContent = p.tipo;
   document.getElementById("verTotal").textContent = p.total.toFixed(2);
 
   const itemsList = document.getElementById("verItems");
@@ -138,6 +168,7 @@ document.getElementById("guardarEdicion").addEventListener("click", () => {
   presupuestos[presupuestoSeleccionado].fecha = document.getElementById("editarFecha").value;
   localStorage.setItem("presupuestos", JSON.stringify(presupuestos));
   mostrarPresupuestos();
+  actualizarResumen();
   bootstrap.Modal.getInstance(document.getElementById("modalEditar")).hide();
 });
 
@@ -152,11 +183,12 @@ document.getElementById("confirmarEliminar").addEventListener("click", () => {
   presupuestos.splice(presupuestoSeleccionado, 1);
   localStorage.setItem("presupuestos", JSON.stringify(presupuestos));
   mostrarPresupuestos();
+  actualizarResumen();
   bootstrap.Modal.getInstance(document.getElementById("modalEliminar")).hide();
 });
 
+// DESCARGAR
 document.getElementById("descargarExcel").addEventListener("click", () => {
-  // 1. Obtener presupuestos de LocalStorage
   const data = JSON.parse(localStorage.getItem("presupuestos")) || [];
 
   if (data.length === 0) {
@@ -164,14 +196,13 @@ document.getElementById("descargarExcel").addEventListener("click", () => {
     return;
   }
 
-  // 2. Crear workbook
   const wb = XLSX.utils.book_new();
 
   data.forEach((presupuesto, index) => {
-    // Estructura: cabecera + items
     const rows = [
       ["Nombre del Presupuesto", presupuesto.nombre],
       ["Fecha", presupuesto.fecha],
+      ["Tipo", presupuesto.tipo],
       [],
       ["Descripción", "Monto"]
     ];
@@ -183,13 +214,75 @@ document.getElementById("descargarExcel").addEventListener("click", () => {
     rows.push([]);
     rows.push(["TOTAL", presupuesto.total]);
 
-    // Convertir a sheet
     const ws = XLSX.utils.aoa_to_sheet(rows);
-
-    // Agregar cada presupuesto como hoja distinta
     XLSX.utils.book_append_sheet(wb, ws, presupuesto.nombre || `Presupuesto${index+1}`);
   });
 
-  // 3. Exportar
   XLSX.writeFile(wb, "presupuestos_detallados.xlsx");
+});
+// Abrir modal simulador
+document.getElementById("simularAhorro").addEventListener("click", () => {
+  const modal = new bootstrap.Modal(document.getElementById("simuladorModal"));
+  modal.show();
+});
+
+// Mostrar campos según modo
+document.getElementById("modoSimulador").addEventListener("change", (e) => {
+  const modo = e.target.value;
+  document.getElementById("campoMeses").style.display = (modo === "meses") ? "block" : "none";
+  document.getElementById("campoAhorroMensual").style.display = (modo === "ahorroMensual") ? "block" : "none";
+});
+
+// Calcular simulación
+document.getElementById("calcularSimulador").addEventListener("click", () => {
+  const meta = parseFloat(document.getElementById("metaAhorro").value) || 0;
+  const ingresos = parseFloat(document.getElementById("totalIngresos").textContent.replace(/\D/g, "")) || 0;
+  const gastos = parseFloat(document.getElementById("totalGastos").textContent.replace(/\D/g, "")) || 0;
+  const ahorroDisponible = ingresos - gastos;
+
+  if (meta <= 0) {
+    alert("⚠️ Ingresa una meta válida.");
+    return;
+  }
+
+  if (ahorroDisponible <= 0) {
+    document.getElementById("resultadoSimulador").textContent =
+      "😓 Actualmente no tienes capacidad de ahorro. Revisa tus gastos.";
+    return;
+  }
+
+  const modo = document.getElementById("modoSimulador").value;
+
+  if (modo === "meses") {
+    const meses = parseInt(document.getElementById("mesesDeseados").value) || 0;
+    if (meses <= 0) {
+      alert("⚠️ Ingresa un número válido de meses.");
+      return;
+    }
+    const ahorroMensual = Math.ceil(meta / meses);
+
+    if (ahorroMensual > ahorroDisponible) {
+      document.getElementById("resultadoSimulador").textContent =
+        `❌ Para ahorrar $${meta.toLocaleString()} en ${meses} meses, necesitarías $${ahorroMensual.toLocaleString()} mensuales, pero tu capacidad máxima es $${ahorroDisponible.toLocaleString()}.`;
+    } else {
+      document.getElementById("resultadoSimulador").textContent =
+        `✅ Para alcanzar tu meta de $${meta.toLocaleString()} en ${meses} meses, necesitas ahorrar $${ahorroMensual.toLocaleString()} cada mes.`;
+    }
+
+  } else if (modo === "ahorroMensual") {
+    let ahorroMensualDeseado = parseFloat(document.getElementById("ahorroMensual").value) || 0;
+    if (ahorroMensualDeseado <= 0) {
+      alert("⚠️ Ingresa un ahorro mensual válido.");
+      return;
+    }
+
+    if (ahorroMensualDeseado > ahorroDisponible) {
+      ahorroMensualDeseado = ahorroDisponible;
+    }
+
+    const meses = Math.ceil(meta / ahorroMensualDeseado);
+
+    document.getElementById("resultadoSimulador").textContent =
+      `✅ Con un ahorro mensual de $${ahorroMensualDeseado.toLocaleString()}, alcanzarás tu meta de $${meta.toLocaleString()} en aproximadamente ${meses} meses.`;
+  }
 });

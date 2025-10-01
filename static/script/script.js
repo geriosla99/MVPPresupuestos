@@ -71,7 +71,7 @@
 
     // Cuando se cierre el modal, marcamos en localStorage que ya se mostró
     modalEl.addEventListener('hidden.bs.modal', () => {
-      try { localStorage.setItem(storageKey, "true"); } catch(e) { /* noop */ }
+      try { localStorage.setItem(storageKey, "true"); } catch (e) { /* noop */ }
     }, { once: true });
   }
 
@@ -91,23 +91,86 @@
       // último paso -> cerrar modal y guardar flag (modal hidden handler guardará el flag también)
       const modalInstance = bootstrap.Modal.getInstance(modalEl);
       if (modalInstance) modalInstance.hide();
-      try { localStorage.setItem(storageKey, "true"); } catch(e) { /* noop */ }
+      try { localStorage.setItem(storageKey, "true"); } catch (e) { /* noop */ }
     }
   });
 
   // Al cargar la página, comprobamos si ya se mostró
   document.addEventListener("DOMContentLoaded", () => {
-    const already = localStorage.getItem(storageKey);
-    if (!already) {
-      // esperamos un tick para asegurarnos que bootstrap está listo
-      setTimeout(openWelcomeModal, 200);
-    }
+    setTimeout(openWelcomeModal, 200);
   });
 
   // (Opcional) función global para forzar abrir la guía otra vez
-  window.mostrarGuiaBienvenida = function() {
+  window.mostrarGuiaBienvenida = function () {
     // Borra flag y muestra
-    try { localStorage.removeItem(storageKey); } catch(e) { /* noop */ }
     setTimeout(openWelcomeModal, 100);
   };
 })();
+let frases = [];
+let fraseIndex = 0;
+
+// Cargar JSON
+async function loadPhrases() {
+  try {
+    const response = await fetch("frases.json");
+    frases = await response.json();
+    if (!Array.isArray(frases)) frases = []; // seguridad
+    changePhrase(); // mostrar la primera
+    setInterval(changePhrase, 5000); // cada 5 seg
+  } catch (error) {
+    console.error("Error cargando JSON:", error);
+  }
+}
+
+function changePhrase() {
+  const quoteEl = document.getElementById("quote");
+  if (frases.length > 0) {
+    const { autor, frase } = frases[fraseIndex];
+    quoteEl.style.opacity = 0;
+    setTimeout(() => {
+      quoteEl.textContent = `"${frase}" — ${autor}`;
+      quoteEl.style.opacity = 1;
+      fraseIndex = (fraseIndex + 1) % frases.length;
+    }, 500);
+  } else {
+    quoteEl.textContent = "No hay frases disponibles.";
+  }
+}
+
+let consejos = [];
+let consejoIndex = 0;
+
+// Cargar JSON
+async function loadConsejo() {
+  try {
+    const response = await fetch("consejos.json");
+    consejos = await response.json();
+    if (!Array.isArray(consejos)) consejos = []; // seguridad
+    changeConsejo(); // mostrar la primera
+    setInterval(changeConsejo, 5000); // cada 5 seg
+  } catch (error) {
+    console.error("Error cargando JSON:", error);
+  }
+}
+
+function changeConsejo() {
+  const adviceEl = document.getElementById("advice");
+  if (consejos.length > 0) {
+    const { titulo, contenido } = consejos[consejoIndex];
+    adviceEl.style.opacity = 0;
+    setTimeout(() => {
+      adviceEl.textContent = `"${contenido}" — ${titulo}`;
+      adviceEl.style.opacity = 1;
+      consejoIndex = (consejoIndex + 1) % consejos.length;
+    }, 500);
+  } else {
+    adviceEl.textContent = "No hay frases disponibles.";
+  }
+}
+
+
+// Iniciar cuando cargue el DOM
+document.addEventListener("DOMContentLoaded", ()=>{
+  loadPhrases();
+  loadConsejo();
+});
