@@ -294,3 +294,13 @@ document.getElementById("calcularSimulador").addEventListener("click", () => {
       `✅ Para alcanzar tu meta de $${meta.toLocaleString()} en ${meses} meses, necesitas ahorrar $${ahorroMensual.toLocaleString()} cada mes.`;
   }
 });
+// Función para limpiar toda la información del simulador
+function limpiarSimulador() {
+  // Resetear inputs
+  document.getElementById("metaAhorro").value = "";
+  document.getElementById("mesesDeseados").value = "";
+  document.getElementById("resultadoSimulador").textContent = "";
+}
+
+// Si usas Bootstrap modal
+document.getElementById("simuladorModal").addEventListener("hidden.bs.modal", limpiarSimulador);
