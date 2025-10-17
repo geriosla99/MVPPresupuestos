@@ -347,3 +347,55 @@ tr:hover {
     text-align: left;
   }
 }
+/* === Ajustes responsive tabla === */
+@media (max-width: 768px) {
+  table.table {
+    border: 0;
+  }
+
+  table.table tbody tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  table.table tbody td {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.5rem 0;
+  }
+
+  table.table tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+    display: none; /* lo ocultamos porque usamos labels reales */
+  }
+
+  table.table thead {
+    display: none;
+  }
+
+  .form-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6c757d;
+  }
+
+  .btn-sm.eliminar {
+    width: 100%;
+  }
+}
+
+/* === Botones principales responsive === */
+@media (max-width: 576px) {
+  .d-flex.flex-wrap.justify-content-center.gap-2.mb-3 button {
+    flex: 1 1 100%;
+  }
+}

@@ -23,29 +23,29 @@
         Bienvenido, aquí puedes registrar tus <b>ingresos</b> y <b>gastos</b> personales.<br>
         Lleva el control de tus finanzas y visualiza cuánto ahorras cada mes.
       </div>
-      <div class="justify-content-around mb-3 d-flex ">
-        <button type="button" class="btn btn-success mx-2" data-bs-toggle="modal" data-bs-target="#modalPresupuesto">
+      <div class="d-flex flex-md-row flex-column align-items-center justify-content-center gap-2 mb-3">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalPresupuesto">
           Crear Presupuesto
         </button>
-        <button class="btn btn-info mx-2" id="descargarExcel">📥 Exportar a Excel</button>
-        <button class="btn btn-secondary mx-2" id="simularAhorro" data-bs-toggle="modal"
-          data-bs-target="#modalSimulador">
+        <button class="btn btn-info" id="descargarExcel">
+          📥 Exportar a Excel
+        </button>
+        <button class="btn btn-secondary" id="simularAhorro" data-bs-toggle="modal" data-bs-target="#modalSimulador">
           Simular ahorro
         </button>
-
       </div>
+
       <div class="financial-summary">
-        <p><strong>Ingresos:</strong> $<span id="totalIngresos">0</span></p>
-        <p><strong>Gastos:</strong> $<span id="totalGastos">0</span></p>
-        <p><strong>Ahorro:</strong> $<span id="totalAhorro">0</span></p>
+        <p><strong>Ingresos:</strong> <span id="totalIngresos">0</span></p>
+        <p><strong>Gastos:</strong> <span id="totalGastos">0</span></p>
+        <p><strong>Ahorro:</strong> <span id="totalAhorro">0</span></p>
       </div>
       <table>
         <thead>
           <tr>
-            <th>#</th>
-            <th>Categoría</th>
-            <th>Fecha</th>
-            <th>Tipo</th>
+            <th>Nombre</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
             <th>Monto</th>
             <th>Acciones</th>
           </tr>
@@ -77,18 +77,15 @@
             <input type="text" id="nombrePresupuesto" class="form-control">
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Fecha</label>
-            <input type="date" id="fechaPresupuesto" class="form-control">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Tipo</label>
-            <select class="form-select tipo-item" id="tipoPresupuesto">
-              <option value="">Seleccione aquí</option>
-              <option value="ingreso">Ingreso</option>
-              <option value="gasto">Gasto</option>
-            </select>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Fecha Inicio</label>
+              <input type="date" id="fechaInicio" class="form-control">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Fecha Fin</label>
+              <input type="date" id="fechaFin" class="form-control">
+            </div>
           </div>
 
           <!-- Tabla de ítems -->
