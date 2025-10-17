@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </td>
         <td>
           <label class="d-md-none form-label">Monto</label>
-          <input type="number" class="form-control monto monto-item" min="0" placeholder="0">
+          <input type="text" class="form-control monto monto-item" min="0" placeholder="0">
         </td>
         <td>
           <label class="d-md-none form-label">Tipo</label>
@@ -47,16 +47,53 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     tbody.appendChild(fila);
 
+    // Cambiar tipo
+    fila.querySelector(".tipo-item").addEventListener("change", actualizarTotal);
+
     fila.querySelector(".eliminar").addEventListener("click", () => {
       fila.remove();
       actualizarTotal();
     });
 
     fila.querySelector(".monto").addEventListener("input", actualizarTotal);
+    fila.querySelector("#agregarItem").addEventListener("input", actualizarTotal);
 
     fila.querySelector(".tipo-item").addEventListener("change", () => {
       actualizarTotal();
     });
+  });
+
+  function numberWithCommas(x) {
+    if (!x) return "$ 0";
+
+    // Eliminar cualquier carácter que no sea número, punto o coma
+    const cleanValue = x.toString().replace(/[^\d.,]/g, "").replace(",", ".");
+    const num = parseFloat(cleanValue);
+
+    if (isNaN(num)) return "$ 0";
+
+    // Formatear al estilo colombiano
+    const formatted = num.toLocaleString("es-CO", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    });
+
+    return `$ ${formatted}`;
+  }
+
+
+  document.addEventListener("input", (e) => {
+    if (e.target.classList.contains("monto")) {
+      // Quita formato anterior
+      let valor = e.target.value.replace(/[^\d]/g, "");
+      if (!valor) {
+        e.target.value = "";
+        return;
+      }
+
+      // Aplicar formato con $
+      e.target.value = numberWithCommas(valor);
+    }
   });
 
   // Helper para formatear números con separador de miles y 2 decimales
@@ -272,105 +309,105 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // DESCARGAR
   // DESCARGAR EXCEL CON ESTILO Y DETALLE
-document.getElementById("descargarExcel").addEventListener("click", () => {
-  const data = cargarPresupuestos();
+  document.getElementById("descargarExcel").addEventListener("click", () => {
+    const data = cargarPresupuestos();
 
-  if (data.length === 0) {
-    alert("⚠️ No hay presupuestos para exportar");
-    return;
-  }
+    if (data.length === 0) {
+      alert("⚠️ No hay presupuestos para exportar");
+      return;
+    }
 
-  // Crear libro nuevo
-  const wb = XLSX.utils.book_new();
+    // Crear libro nuevo
+    const wb = XLSX.utils.book_new();
 
-  // =====================
-  // 🧾 HOJA 1: RESUMEN GENERAL
-  // =====================
-  const resumen = [["Nombre del Presupuesto", "Fecha Inicio", "Fecha Fin", "Ingresos", "Gastos", "Ahorro Total"]];
-  data.forEach(p => {
-    resumen.push([
-      p.nombre,
-      p.fechaInicio,
-      p.fechaFin,
-      p.totalIngresos || 0,
-      p.totalEgresos || 0,
-      (p.totalIngresos || 0) - (p.totalEgresos || 0)
-    ]);
-  });
-
-  const wsResumen = XLSX.utils.aoa_to_sheet(resumen);
-  XLSX.utils.book_append_sheet(wb, wsResumen, "Resumen General");
-
-  // =====================
-  // 📋 HOJAS DETALLADAS POR PRESUPUESTO
-  // =====================
-  data.forEach((p, i) => {
-    const rows = [
-      ["Nombre del Presupuesto", p.nombre],
-      ["Fecha Inicio", p.fechaInicio],
-      ["Fecha Fin", p.fechaFin],
-      [],
-      ["Descripción", "Tipo", "Monto"]
-    ];
-
-    (p.items || []).forEach(item => {
-      rows.push([item.descripcion, item.tipo, item.monto]);
+    // =====================
+    // 🧾 HOJA 1: RESUMEN GENERAL
+    // =====================
+    const resumen = [["Nombre del Presupuesto", "Fecha Inicio", "Fecha Fin", "Ingresos", "Gastos", "Ahorro Total"]];
+    data.forEach(p => {
+      resumen.push([
+        p.nombre,
+        p.fechaInicio,
+        p.fechaFin,
+        p.totalIngresos || 0,
+        p.totalEgresos || 0,
+        (p.totalIngresos || 0) - (p.totalEgresos || 0)
+      ]);
     });
 
-    rows.push([]);
-    rows.push(["Total Ingresos", "", p.totalIngresos || 0]);
-    rows.push(["Total Gastos", "", p.totalEgresos || 0]);
-    rows.push(["Ahorro Total", "", (p.totalIngresos || 0) - (p.totalEgresos || 0)]);
+    const wsResumen = XLSX.utils.aoa_to_sheet(resumen);
+    XLSX.utils.book_append_sheet(wb, wsResumen, "Resumen General");
 
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, p.nombre.substring(0, 28) || `Presupuesto_${i + 1}`);
-  });
+    // =====================
+    // 📋 HOJAS DETALLADAS POR PRESUPUESTO
+    // =====================
+    data.forEach((p, i) => {
+      const rows = [
+        ["Nombre del Presupuesto", p.nombre],
+        ["Fecha Inicio", p.fechaInicio],
+        ["Fecha Fin", p.fechaFin],
+        [],
+        ["Descripción", "Tipo", "Monto"]
+      ];
 
-  // =====================
-  // 🎨 ESTILOS BÁSICOS (simple pero elegante)
-  // =====================
-  const applyStyles = ws => {
-    const range = XLSX.utils.decode_range(ws['!ref']);
-    for (let R = range.s.r; R <= range.e.r; ++R) {
-      for (let C = range.s.c; C <= range.e.c; ++C) {
-        const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
-        const cell = ws[cellRef];
-        if (!cell) continue;
+      (p.items || []).forEach(item => {
+        rows.push([item.descripcion, item.tipo, item.monto]);
+      });
 
-        // Estilos base
-        cell.s = {
-          font: { name: "Calibri", sz: 12, color: { rgb: "333333" } },
-          alignment: { vertical: "center", horizontal: "center" },
-          border: {
-            top: { style: "thin", color: { rgb: "CCCCCC" } },
-            bottom: { style: "thin", color: { rgb: "CCCCCC" } },
-            left: { style: "thin", color: { rgb: "CCCCCC" } },
-            right: { style: "thin", color: { rgb: "CCCCCC" } },
+      rows.push([]);
+      rows.push(["Total Ingresos", "", p.totalIngresos || 0]);
+      rows.push(["Total Gastos", "", p.totalEgresos || 0]);
+      rows.push(["Ahorro Total", "", (p.totalIngresos || 0) - (p.totalEgresos || 0)]);
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, p.nombre.substring(0, 28) || `Presupuesto_${i + 1}`);
+    });
+
+    // =====================
+    // 🎨 ESTILOS BÁSICOS (simple pero elegante)
+    // =====================
+    const applyStyles = ws => {
+      const range = XLSX.utils.decode_range(ws['!ref']);
+      for (let R = range.s.r; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+          const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+          const cell = ws[cellRef];
+          if (!cell) continue;
+
+          // Estilos base
+          cell.s = {
+            font: { name: "Calibri", sz: 12, color: { rgb: "333333" } },
+            alignment: { vertical: "center", horizontal: "center" },
+            border: {
+              top: { style: "thin", color: { rgb: "CCCCCC" } },
+              bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+              left: { style: "thin", color: { rgb: "CCCCCC" } },
+              right: { style: "thin", color: { rgb: "CCCCCC" } },
+            }
+          };
+
+          // Encabezados en negrita y color suave
+          if (R === 0 || cell.v === "Descripción" || cell.v === "Tipo" || cell.v === "Monto") {
+            cell.s.fill = { fgColor: { rgb: "E3F2FD" } };
+            cell.s.font = { bold: true, color: { rgb: "1A237E" } };
           }
-        };
-
-        // Encabezados en negrita y color suave
-        if (R === 0 || cell.v === "Descripción" || cell.v === "Tipo" || cell.v === "Monto") {
-          cell.s.fill = { fgColor: { rgb: "E3F2FD" } };
-          cell.s.font = { bold: true, color: { rgb: "1A237E" } };
         }
       }
-    }
-    // Ajustar ancho de columnas
-    const cols = [];
-    for (let C = range.s.c; C <= range.e.c; ++C) cols.push({ wch: 18 });
-    ws['!cols'] = cols;
-  };
+      // Ajustar ancho de columnas
+      const cols = [];
+      for (let C = range.s.c; C <= range.e.c; ++C) cols.push({ wch: 18 });
+      ws['!cols'] = cols;
+    };
 
-  // Aplicar estilos a todas las hojas
-  wb.SheetNames.forEach(sheetName => {
-    const ws = wb.Sheets[sheetName];
-    if (ws) applyStyles(ws);
+    // Aplicar estilos a todas las hojas
+    wb.SheetNames.forEach(sheetName => {
+      const ws = wb.Sheets[sheetName];
+      if (ws) applyStyles(ws);
+    });
+
+    // Guardar archivo
+    XLSX.writeFile(wb, "Presupuestos_Detallados_Estilo.xlsx");
   });
-
-  // Guardar archivo
-  XLSX.writeFile(wb, "Presupuestos_Detallados_Estilo.xlsx");
-});
 
 
   // Abrir modal simulador

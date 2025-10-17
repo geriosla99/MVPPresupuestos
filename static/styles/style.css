@@ -140,3 +140,147 @@
     font-size: 0.85rem;
   }
 }
+
+/* === Responsividad de la tabla de ítems === */
+@media (max-width: 768px) {
+  #tablaItems thead {
+    display: none;
+    /* ocultar encabezados */
+  }
+
+  #tablaItems,
+  #tablaItems tbody,
+  #tablaItems tr,
+  #tablaItems td {
+    display: block;
+    width: 100%;
+  }
+
+  #tablaItems tr {
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 0.75rem;
+    background: #f9f9f9;
+  }
+
+  #tablaItems td {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.5rem;
+  }
+
+  #tablaItems td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    color: #555;
+  }
+
+  #tablaItems td:last-child {
+    margin-bottom: 0;
+  }
+
+  #tablaItems .btn {
+    width: 100%;
+  }
+}
+
+:root {
+  --primary: #00b894;
+  --secondary: #0984e3;
+  --light: #f8f9fa;
+  --dark: #2d3436;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e8f6f3 100%);
+  color: var(--dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  padding: 1.5rem 0;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--primary) !important;
+}
+
+.hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.hero h1 {
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--dark);
+}
+
+.hero h3 {
+  color: #636e72;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.hero .btn-main {
+  background: var(--primary);
+  border: none;
+  padding: 0.8rem 1.6rem;
+  font-weight: 600;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+.hero .btn-main:hover {
+  background: var(--secondary);
+  color: #fff;
+}
+
+.features {
+  background: #fff;
+  padding: 3rem 1rem;
+}
+
+.feature {
+  text-align: center;
+  padding: 1rem;
+}
+
+.feature i {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 0.8rem;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: #636e72;
+}
+
+@media (min-width: 768px) {
+  .hero h1 {
+    font-size: 2.6rem;
+  }
+
+  .hero h3 {
+    font-size: 1.2rem;
+  }
+}
+
+.monto {
+  text-align: left !important;
+}
