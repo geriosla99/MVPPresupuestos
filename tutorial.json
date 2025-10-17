@@ -1,60 +1,98 @@
 [
-    {
-      "paso": 1,
-      "accion": "Abrir el dashboard",
-      "descripcion": "El usuario ingresa a la página principal y visualiza el panel de presupuestos personales."
-    },
-    {
-      "paso": 2,
-      "accion": "Crear un nuevo presupuesto",
-      "descripcion": "Haz clic en el botón 'Crear Presupuesto'.",
-      "resultado": "Se abre un modal con un formulario para ingresar nombre, fecha e ítems."
-    },
-    {
-      "paso": 3,
-      "accion": "Agregar ítems",
-      "descripcion": "En el modal, presiona el botón '+ Agregar Ítem' para añadir ingresos o gastos.",
-      "detalle": {
-        "inputs": {
-          "descripcion": "Ejemplo: 'Supermercado'",
-          "monto": "Ejemplo: 500000"
-        }
+  {
+    "paso": 1,
+    "titulo": "👋 Bienvenido a tu espacio financiero",
+    "accion": "Abrir el panel principal",
+    "descripcion": "Aquí podrás llevar el control de tus ingresos y gastos de manera sencilla. No necesitas saber de contabilidad, solo registrar lo que entra y lo que sale.",
+    "resultado": "Verás un panel claro con opciones para empezar a crear tu primer presupuesto.",
+    "tip": "Tómate tu tiempo, no hay errores que no puedas corregir.",
+    "tiempoEstimado": "10 segundos"
+  },
+  {
+    "paso": 2,
+    "titulo": "📝 Crea tu primer presupuesto",
+    "accion": "Presiona el botón 'Crear Presupuesto'",
+    "descripcion": "Ponle un nombre (por ejemplo: 'Mes de octubre') y elige las fechas de inicio y fin. Así sabrás exactamente a qué periodo corresponde tu presupuesto.",
+    "resultado": "Se abre una ventanita donde podrás empezar a agregar tus ingresos y gastos.",
+    "tip": "Usa nombres que te ayuden a identificar tus presupuestos fácilmente, como 'Viaje a la playa' o 'Fin de año'.",
+    "tiempoEstimado": "30 segundos"
+  },
+  {
+    "paso": 3,
+    "titulo": "💰 Agrega tus ingresos y gastos",
+    "accion": "Haz clic en '+ Agregar Ítem'",
+    "descripcion": "Aquí puedes anotar tus ingresos (como tu sueldo o algún pago extra) y tus gastos (como la renta o el supermercado).",
+    "detalle": {
+      "inputs": {
+        "descripcion": "Por ejemplo: 'Supermercado' o 'Sueldo mensual'",
+        "monto": "Por ejemplo: 500000"
       }
     },
-    {
-      "paso": 4,
-      "accion": "Calcular total",
-      "descripcion": "El sistema suma automáticamente los montos ingresados.",
-      "resultado": "Se muestra el total en la parte inferior del modal."
-    },
-    {
-      "paso": 5,
-      "accion": "Guardar presupuesto",
-      "descripcion": "Presiona el botón 'Guardar'.",
-      "resultado": "El presupuesto queda almacenado en el LocalStorage y aparece en la tabla del dashboard."
-    },
-    {
-      "paso": 6,
-      "accion": "Ver un presupuesto",
-      "descripcion": "En la tabla, presiona el botón 'Ver' del presupuesto deseado.",
-      "resultado": "Se abre un modal mostrando los detalles completos."
-    },
-    {
-      "paso": 7,
-      "accion": "Editar un presupuesto",
-      "descripcion": "Presiona el botón 'Editar'.",
-      "resultado": "Se abre el modal con la información cargada para modificar y actualizar."
-    },
-    {
-      "paso": 8,
-      "accion": "Eliminar un presupuesto",
-      "descripcion": "Presiona el botón 'Eliminar'.",
-      "resultado": "El presupuesto seleccionado se borra del LocalStorage y desaparece de la tabla."
-    },
-    {
-      "paso": 9,
-      "accion": "Exportar a Excel",
-      "descripcion": "Haz clic en el botón 'Exportar Excel'.",
-      "resultado": "Se descarga un archivo .xlsx con el detalle de todos los presupuestos."
-    }
-  ]
+    "resultado": "Cada vez que agregues algo, verás el total actualizado automáticamente.",
+    "tip": "No te preocupes si te equivocas, puedes eliminar o editar los ítems cuando quieras.",
+    "tiempoEstimado": "1 minuto"
+  },
+  {
+    "paso": 4,
+    "titulo": "📊 Mira cómo va tu presupuesto",
+    "accion": "Observa el total al final del formulario",
+    "descripcion": "La app suma automáticamente tus ingresos y gastos para mostrarte cuánto te queda o si te pasaste del presupuesto.",
+    "resultado": "Tendrás una idea clara de cómo estás manejando tu dinero.",
+    "tip": "Si el número es negativo, significa que estás gastando más de lo que ganas. 😉",
+    "tiempoEstimado": "Instantáneo"
+  },
+  {
+    "paso": 5,
+    "titulo": "💾 Guarda tu presupuesto",
+    "accion": "Haz clic en 'Guardar'",
+    "descripcion": "Cuando termines de agregar tus datos, guarda tu presupuesto. Todo se almacena directamente en tu navegador.",
+    "resultado": "Tu presupuesto queda guardado y aparecerá en la tabla principal.",
+    "tip": "No necesitas registrarte ni tener conexión a internet para guardarlo. ¡Todo queda en tu dispositivo!",
+    "tiempoEstimado": "10 segundos"
+  },
+  {
+    "paso": 6,
+    "titulo": "👀 Revisa tus presupuestos",
+    "accion": "Haz clic en 'Ver' en la lista principal",
+    "descripcion": "Puedes revisar los detalles de cualquier presupuesto que hayas guardado, incluyendo sus ingresos y gastos.",
+    "resultado": "Se muestra toda la información de forma ordenada y fácil de leer.",
+    "tip": "Ideal para comparar meses o ver cómo cambian tus gastos con el tiempo.",
+    "tiempoEstimado": "15 segundos"
+  },
+  {
+    "paso": 7,
+    "titulo": "✏️ Edita si necesitas cambiar algo",
+    "accion": "Presiona el botón 'Editar'",
+    "descripcion": "Si algo cambió o cometiste un error, puedes modificar los datos sin tener que empezar de cero.",
+    "resultado": "Tu presupuesto se actualiza con la nueva información al guardar los cambios.",
+    "tip": "Nada está escrito en piedra, puedes ajustar tus finanzas cuando quieras.",
+    "tiempoEstimado": "30 segundos"
+  },
+  {
+    "paso": 8,
+    "titulo": "🗑️ Elimina un presupuesto",
+    "accion": "Haz clic en 'Eliminar' y confirma",
+    "descripcion": "Si ya no necesitas un presupuesto, puedes borrarlo fácilmente.",
+    "resultado": "El presupuesto desaparece de la lista y se libera espacio.",
+    "tip": "No te preocupes, siempre puedes crear uno nuevo más adelante.",
+    "tiempoEstimado": "10 segundos"
+  },
+  {
+    "paso": 9,
+    "titulo": "📥 Exporta tus datos a Excel",
+    "accion": "Haz clic en 'Exportar Excel'",
+    "descripcion": "Se descargará un archivo con todos tus presupuestos y sus detalles. Puedes abrirlo en tu computador o compartirlo.",
+    "resultado": "Obtienes un documento bonito y ordenado con todos tus datos financieros.",
+    "tip": "Perfecto para tener un respaldo o analizar tus finanzas con más detalle.",
+    "tiempoEstimado": "15 segundos"
+  },
+  {
+    "paso": 10,
+    "titulo": "🎯 Simula tus metas de ahorro",
+    "accion": "Presiona 'Simular ahorro'",
+    "descripcion": "¿Tienes una meta? (por ejemplo, ahorrar para unas vacaciones). Aquí puedes calcular cuánto deberías guardar cada mes para lograrlo.",
+    "resultado": "La app te muestra si tu presupuesto actual te permite alcanzar esa meta y cuánto podrías ahorrar.",
+    "tip": "Juega con los números hasta encontrar el equilibrio perfecto para ti.",
+    "tiempoEstimado": "20 segundos"
+  }
+]
