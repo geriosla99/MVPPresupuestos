@@ -1,0 +1,9 @@
+{
+  "short_name": "TuPresupuesto",
+  "name": "TuPresupuesto - Finanzas Personales",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#0A2342",
+  "background_color": "#F0F4F8"
+}
