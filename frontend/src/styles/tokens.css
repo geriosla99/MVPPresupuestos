@@ -1,0 +1,47 @@
+/* ─── DESIGN TOKENS ─── */
+/* Variables CSS reutilizables en toda la app */
+:root {
+  /* Colores principales */
+  --navy:   #0A2342;
+  --teal:   #028090;
+  --mint:   #02C39A;
+  --amber:  #F59E0B;
+  --rose:   #F43F5E;
+  --violet: #7C3AED;
+  --ocean:  #0EA5E9;
+
+  /* Superficies */
+  --bg:     #F0F4F8;
+  --card:   #FFFFFF;
+  --text:   #1E293B;
+  --muted:  #64748B;
+  --border: #E2E8F0;
+
+  /* Forma */
+  --radius: 16px;
+  --shadow: 0 2px 16px rgba(10, 35, 66, .08);
+  --shadow-hover: 0 8px 32px rgba(10, 35, 66, .12);
+}
+
+* , *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Números monoespaciados */
+.mono { font-family: 'DM Mono', monospace; }
+
+/* Animación universal de páginas */
+.page-fade { animation: fadeIn .2s ease; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
