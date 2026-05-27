@@ -1,11 +1,36 @@
 """
 Schemas Pydantic para entrada/salida de la API.
 Coinciden con los contratos descritos en el frontend (src/api/*.js).
+
+Nota: Firestore usa IDs de tipo string para los documentos, por eso los campos
+`id` se declaran como str (en la versión SQL eran enteros autoincrementales).
 """
-from datetime import date, datetime
+import re
+from datetime import date
 from typing import Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+# ─────────────────────────── Validación de contraseña ───────────────────────────
+
+
+def validate_password_strength(value: str) -> str:
+    """
+    Reglas de contraseña fuerte (mismas que valida el frontend):
+    mínimo 8 caracteres, una mayúscula, una minúscula, un número y un especial.
+    """
+    if len(value) < 8:
+        raise ValueError("La contraseña debe tener al menos 8 caracteres.")
+    if not re.search(r"[A-Z]", value):
+        raise ValueError("La contraseña debe incluir al menos una letra mayúscula.")
+    if not re.search(r"[a-z]", value):
+        raise ValueError("La contraseña debe incluir al menos una letra minúscula.")
+    if not re.search(r"\d", value):
+        raise ValueError("La contraseña debe incluir al menos un número.")
+    if not re.search(r"[^A-Za-z0-9]", value):
+        raise ValueError("La contraseña debe incluir al menos un carácter especial.")
+    return value
+
 
 # ─────────────────────────── Auth / User ───────────────────────────
 
@@ -16,11 +41,24 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str = Field(min_length=6, max_length=128)
+    password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("password")
+    @classmethod
+    def _check_password(cls, v: str) -> str:
+        return validate_password_strength(v)
+
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "email":    "test@geral.com",
+            "nombre":   "Geral",
+            "password": "Password123!",
+        }
+    })
 
 
 class UserOut(UserBase):
-    id: int
+    id: str
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -29,11 +67,29 @@ class LoginIn(BaseModel):
     email: EmailStr
     password: str
 
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "email":    "test@geral.com",
+            "password": "Password123!",
+        }
+    })
+
 
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
+
+
+class ChangePasswordIn(BaseModel):
+    """Cambio de contraseña del usuario autenticado."""
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("new_password")
+    @classmethod
+    def _check_new_password(cls, v: str) -> str:
+        return validate_password_strength(v)
 
 
 # ─────────────────────────── Transactions ───────────────────────────
@@ -59,7 +115,7 @@ class TransactionUpdate(TransactionBase):
 
 
 class TransactionOut(TransactionBase):
-    id: int
+    id: str
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -105,7 +161,7 @@ class GoalUpdate(GoalBase):
 
 
 class GoalOut(GoalBase):
-    id: int
+    id: str
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -124,3 +180,26 @@ class BudgetItemIn(BaseModel):
 
 class BudgetItemOut(BudgetItemIn):
     gastado: float = 0.0
+
+
+# ─────────────────────────── Categories (personalizadas) ───────────────────────────
+
+
+class CategoryBase(BaseModel):
+    nombre: str = Field(min_length=1, max_length=60)
+    tipo: TipoLiteral
+    icono: str = Field(default="🏷️", max_length=8)
+
+
+class CategoryCreate(CategoryBase):
+    pass
+
+
+class CategoryUpdate(CategoryBase):
+    pass
+
+
+class CategoryOut(CategoryBase):
+    id: str
+
+    model_config = ConfigDict(from_attributes=True)

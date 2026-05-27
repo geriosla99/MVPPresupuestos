@@ -1,12 +1,19 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import marca from '../assets/marca.png';
 
-const NAV_ITEMS = [
-  { to: '/dashboard',     icon: '🏠', label: 'Dashboard' },
-  { to: '/ingresos',      icon: '💵', label: 'Ingresos' },
-  { to: '/gastos',        icon: '💸', label: 'Gastos' },
-  { to: '/metas',         icon: '🎯', label: 'Metas de Ahorro' },
-  { to: '/presupuesto',   icon: '📊', label: 'Presupuesto' },
+const NAV_PRINCIPAL = [
+  { to: '/dashboard',   icon: '🏠', label: 'Dashboard' },
+  { to: '/ingresos',    icon: '💵', label: 'Ingresos' },
+  { to: '/gastos',      icon: '💸', label: 'Gastos' },
+  { to: '/metas',       icon: '🎯', label: 'Metas de Ahorro' },
+  { to: '/presupuesto', icon: '📊', label: 'Presupuesto' },
+  { to: '/reportes',    icon: '📈', label: 'Reportes' },
+];
+
+const NAV_CUENTA = [
+  { to: '/perfil',        icon: '👤', label: 'Perfil' },
+  { to: '/configuracion', icon: '⚙️', label: 'Configuración' },
 ];
 
 export default function Sidebar() {
@@ -14,33 +21,36 @@ export default function Sidebar() {
   const initial = (user?.nombre || user?.email || 'U').charAt(0).toUpperCase();
   const displayName = user?.nombre || user?.email || 'Usuario';
 
+  const renderItem = (item) => (
+    <NavLink
+      key={item.to}
+      to={item.to}
+      className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+    >
+      <span className="nav-icon">{item.icon}</span>
+      {item.label}
+    </NavLink>
+  );
+
   return (
     <nav className="nav">
       <div className="nav-logo">
-        <div className="nav-logo-icon">💰</div>
-        <div className="nav-logo-text">Tu<span>Presupuesto</span></div>
+        <img src={marca} alt="" className="nav-logo-img" />
       </div>
 
-      <div className="nav-label">Principal</div>
+      <div className="nav-scroll">
+        <div className="nav-label">Principal</div>
+        {NAV_PRINCIPAL.map(renderItem)}
 
-      {NAV_ITEMS.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          className={({ isActive }) =>
-            isActive ? 'nav-item active' : 'nav-item'
-          }
-        >
-          <span className="nav-icon">{item.icon}</span>
-          {item.label}
-        </NavLink>
-      ))}
+        <div className="nav-label nav-label-spaced">Cuenta</div>
+        {NAV_CUENTA.map(renderItem)}
+      </div>
 
       <div className="nav-footer">
-        <div className="user-chip">
+        <NavLink to="/perfil" className="user-chip">
           <div className="user-avatar">{initial}</div>
           <div className="user-name">{displayName}</div>
-        </div>
+        </NavLink>
         <button className="logout-btn" onClick={logout} type="button">
           Cerrar sesión
         </button>

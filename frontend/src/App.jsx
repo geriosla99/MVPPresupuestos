@@ -10,6 +10,9 @@ import Ingresos from './pages/Ingresos';
 import Gastos from './pages/Gastos';
 import Metas from './pages/Metas';
 import Presupuesto from './pages/Presupuesto';
+import Reportes from './pages/Reportes';
+import Configuracion from './pages/Configuracion';
+import Perfil from './pages/Perfil';
 
 /**
  * Mapa de rutas:
@@ -40,6 +43,9 @@ export default function App() {
             <Route path="/gastos" element={<Gastos />} />
             <Route path="/metas" element={<Metas />} />
             <Route path="/presupuesto" element={<Presupuesto />} />
+            <Route path="/reportes" element={<Reportes />} />
+            <Route path="/configuracion" element={<Configuracion />} />
+            <Route path="/perfil" element={<Perfil />} />
           </Route>
 
           {/* Default */}

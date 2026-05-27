@@ -22,3 +22,7 @@ __pycache__/
 *.sqlite
 *.sqlite3
 *.db
+
+# Credenciales de Firebase — nunca subir el JSON al repo
+firebase-credentials.json
+*-firebase-adminsdk-*.json

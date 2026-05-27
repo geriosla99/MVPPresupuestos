@@ -60,7 +60,7 @@ export default function Dashboard() {
   const ingresos = summary?.ingresos ?? 0;
   const gastos   = summary?.gastos   ?? 0;
   const balance  = summary?.balance ?? (ingresos - gastos);
-  const byCat    = summary?.by_category ?? [];
+  const byCat    = useMemo(() => summary?.by_category ?? [], [summary]);
 
   const totalGastosCat = useMemo(
     () => byCat.reduce((acc, c) => acc + (c.total || 0), 0),
@@ -73,7 +73,7 @@ export default function Dashboard() {
       {
         label: 'Ingresos',
         data: monthly.map((m) => m.ingresos || 0),
-        backgroundColor: '#02C39A',
+        backgroundColor: '#1EA64A',
         borderRadius: 8,
       },
       {

@@ -1,5 +1,10 @@
 """
-CRUD de transacciones (ingresos y gastos).
+CRUD de transacciones (ingresos y gastos) sobre Firestore.
+
+Documentos: users/{user_id}/transactions/{tx_id}
+La fecha se almacena como string 'YYYY-MM-DD' para que las consultas por rango
+funcionen con orden alfabético (que coincide con el cronológico).
+
 Contrato (src/api/transactions.js):
   GET    /transactions?tipo=ingreso|gasto    → Transaction[]
   GET    /transactions/recent?limit=5         → Transaction[]
@@ -7,91 +12,113 @@ Contrato (src/api/transactions.js):
   PUT    /transactions/{id}                   → Transaction
   DELETE /transactions/{id}                   → 204
 """
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from datetime import date
 
-from ..database import get_db
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+
 from ..deps import get_current_user
-from ..models import Transaction, User
-from ..schemas import TransactionCreate, TransactionOut, TransactionUpdate
+from ..firebase import snapshot_to_dict, transactions_col
+from ..schemas import TransactionCreate, TransactionOut, TransactionUpdate, UserOut
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
+
+
+def _serialize(payload_dict: dict) -> dict:
+    """Convierte tipos no soportados directamente por Firestore (date → str ISO)."""
+    fecha = payload_dict.get("fecha")
+    if isinstance(fecha, date):
+        payload_dict["fecha"] = fecha.isoformat()
+    return payload_dict
+
+
+def _to_out(snap) -> TransactionOut:
+    return TransactionOut.model_validate(snapshot_to_dict(snap))
+
+
+def _sorted_desc(items: list[TransactionOut]) -> list[TransactionOut]:
+    """Ordena las transacciones por fecha descendente (más recientes primero)."""
+    return sorted(items, key=lambda t: t.fecha, reverse=True)
 
 
 @router.get("", response_model=list[TransactionOut])
 def list_transactions(
     tipo: str | None = Query(default=None, pattern="^(ingreso|gasto)$"),
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ):
-    q = db.query(Transaction).filter(Transaction.user_id == user.id)
+    # Solo se aplica un filtro de igualdad en Firestore (no requiere índice
+    # compuesto). El ordenamiento por fecha se hace en memoria para no exigir
+    # un índice combinado tipo+fecha.
+    q = transactions_col(user.id)
     if tipo:
-        q = q.filter(Transaction.tipo == tipo)
-    return q.order_by(Transaction.fecha.desc(), Transaction.id.desc()).all()
+        q = q.where("tipo", "==", tipo)
+    items = [_to_out(d) for d in q.get()]
+    return _sorted_desc(items)
 
 
 @router.get("/recent", response_model=list[TransactionOut])
 def list_recent(
     limit: int = Query(default=5, ge=1, le=50),
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ):
-    return (
-        db.query(Transaction)
-        .filter(Transaction.user_id == user.id)
-        .order_by(Transaction.fecha.desc(), Transaction.id.desc())
-        .limit(limit)
-        .all()
-    )
+    items = [_to_out(d) for d in transactions_col(user.id).get()]
+    return _sorted_desc(items)[:limit]
 
 
-@router.post("", response_model=TransactionOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=list[TransactionOut], status_code=status.HTTP_201_CREATED)
 def create_transaction(
     payload: TransactionCreate,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ):
-    tx = Transaction(user_id=user.id, **payload.model_dump())
-    db.add(tx)
-    db.commit()
-    db.refresh(tx)
-    return tx
+    data = _serialize(payload.model_dump())
+    ref = transactions_col(user.id).document()
+    ref.set(data)
+    # Devolver una lista con la transacción creada para que el cliente
+    # reciba un array similar a: [{...}]
+    return [_to_out(ref.get())]
 
 
 @router.put("/{tx_id}", response_model=TransactionOut)
 def update_transaction(
-    tx_id: int,
+    tx_id: str,
     payload: TransactionUpdate,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ):
-    tx = (
-        db.query(Transaction)
-        .filter(Transaction.id == tx_id, Transaction.user_id == user.id)
-        .first()
-    )
-    if not tx:
+    ref = transactions_col(user.id).document(tx_id)
+    if not ref.get().exists:
         raise HTTPException(status_code=404, detail="Transacción no encontrada.")
 
-    for field, value in payload.model_dump().items():
-        setattr(tx, field, value)
-    db.commit()
-    db.refresh(tx)
-    return tx
+    ref.set(_serialize(payload.model_dump()))  # reemplazo completo del documento
+    return _to_out(ref.get())
 
 
 @router.delete("/{tx_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_transaction(
-    tx_id: int,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+    tx_id: str,
+    user: UserOut = Depends(get_current_user),
 ):
-    tx = (
-        db.query(Transaction)
-        .filter(Transaction.id == tx_id, Transaction.user_id == user.id)
-        .first()
-    )
-    if not tx:
+    ref = transactions_col(user.id).document(tx_id)
+    if not ref.get().exists:
         raise HTTPException(status_code=404, detail="Transacción no encontrada.")
-    db.delete(tx)
-    db.commit()
+    ref.delete()
+
+
+@router.delete(
+    "",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Eliminar TODOS los movimientos del usuario",
+    description=(
+        "Borra todas las transacciones (ingresos y gastos) del usuario autenticado. "
+        "Pensado para la opción 'borrar mis datos' de la sección de privacidad. "
+        "No afecta metas ni presupuesto."
+    ),
+)
+def delete_all_transactions(user: UserOut = Depends(get_current_user)):
+    col = transactions_col(user.id)
+    while True:
+        docs = list(col.limit(200).stream())
+        if not docs:
+            break
+        for d in docs:
+            d.reference.delete()
+        if len(docs) < 200:
+            break

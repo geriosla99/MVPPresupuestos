@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { transactionsApi } from '../api/transactions';
+import { categoriesApi } from '../api/categories';
 import { formatCOP, formatDate, getCat, today } from '../utils/format';
 
 /**
@@ -24,6 +25,18 @@ export default function TransactionsPage({ tipo, categorias, accentClass }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [customCats, setCustomCats] = useState([]);
+
+  // Categorías visibles = predefinidas + personalizadas del usuario.
+  const allCategorias = useMemo(() => {
+    const extra = customCats.map((c) => ({
+      value: c.nombre,
+      label: `${c.icono || '🏷️'} ${c.nombre}`,
+    }));
+    // Evita duplicar una personalizada que coincida con una predefinida.
+    const baseValues = new Set(categorias.map((c) => c.value));
+    return [...categorias, ...extra.filter((e) => !baseValues.has(e.value))];
+  }, [categorias, customCats]);
 
   const load = async () => {
     setLoading(true);
@@ -42,6 +55,11 @@ export default function TransactionsPage({ tipo, categorias, accentClass }) {
 
   useEffect(() => {
     load();
+    // Carga las categorías personalizadas de este tipo (no bloquea la página).
+    categoriesApi
+      .list(tipo)
+      .then((cats) => setCustomCats(Array.isArray(cats) ? cats : []))
+      .catch(() => setCustomCats([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipo]);
 
@@ -167,7 +185,7 @@ export default function TransactionsPage({ tipo, categorias, accentClass }) {
               onChange={handleChange}
               disabled={submitting}
             >
-              {categorias.map((c) => (
+              {allCategorias.map((c) => (
                 <option key={c.value} value={c.value}>
                   {c.label}
                 </option>
@@ -184,7 +202,8 @@ export default function TransactionsPage({ tipo, categorias, accentClass }) {
               name="monto"
               type="number"
               min="0"
-              step="1000"
+              step="any"
+              inputMode="decimal"
               placeholder="0"
               value={form.monto}
               onChange={handleChange}

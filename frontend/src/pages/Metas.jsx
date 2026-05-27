@@ -20,9 +20,13 @@ export default function Metas() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  // Estado para "aportar"
+  // Estado para "aportar" (suma al acumulado)
   const [contribFor, setContribFor] = useState(null); // id de la meta
   const [contribMonto, setContribMonto] = useState('');
+
+  // Estado para "ajustar" (fija el acumulado a un valor exacto)
+  const [adjustFor, setAdjustFor] = useState(null);
+  const [adjustMonto, setAdjustMonto] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -134,6 +138,33 @@ export default function Metas() {
     }
   };
 
+  /**
+   * Ajusta el acumulado: reemplaza monto_actual por el valor exacto que ingrese
+   * el usuario (a diferencia de "aportar" que lo suma). Útil cuando el saldo real
+   * difiere de lo que está registrado en la meta.
+   */
+  const handleAdjust = async (g) => {
+    const monto = Number(adjustMonto);
+    if (adjustMonto === '' || Number.isNaN(monto) || monto < 0) {
+      setError('Ingresa un acumulado válido (debe ser cero o mayor).');
+      return;
+    }
+    try {
+      const updated = await goalsApi.update(g.id, {
+        nombre:         g.nombre,
+        monto_objetivo: Number(g.monto_objetivo) || 0,
+        monto_actual:   monto,
+        icono:          g.icono || '🎯',
+        fecha_limite:   g.fecha_limite || null,
+      });
+      setItems((prev) => prev.map((x) => (x.id === g.id ? updated : x)));
+      setAdjustFor(null);
+      setAdjustMonto('');
+    } catch (err) {
+      setError(err.response?.data?.detail || 'No pudimos ajustar el acumulado.');
+    }
+  };
+
   return (
     <>
       <form className="form-card" onSubmit={handleSubmit}>
@@ -179,7 +210,7 @@ export default function Metas() {
               name="monto_objetivo"
               type="number"
               min="0"
-              step="10000"
+              step="any"
               placeholder="0"
               value={form.monto_objetivo}
               onChange={handleChange}
@@ -194,7 +225,7 @@ export default function Metas() {
               name="monto_actual"
               type="number"
               min="0"
-              step="10000"
+              step="any"
               placeholder="0"
               value={form.monto_actual}
               onChange={handleChange}
@@ -300,7 +331,8 @@ export default function Metas() {
                       <input
                         type="number"
                         min="0"
-                        step="10000"
+                        step="any"
+                        inputMode="decimal"
                         placeholder="Monto a aportar"
                         value={contribMonto}
                         onChange={(e) => setContribMonto(e.target.value)}
@@ -330,14 +362,63 @@ export default function Metas() {
                         Cancelar
                       </button>
                     </>
+                  ) : adjustFor === g.id ? (
+                    <>
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        inputMode="decimal"
+                        placeholder="Nuevo acumulado"
+                        value={adjustMonto}
+                        onChange={(e) => setAdjustMonto(e.target.value)}
+                        style={{
+                          padding: '6px 10px',
+                          border: '1.5px solid var(--border)',
+                          borderRadius: 8,
+                          fontSize: '.85rem',
+                          flex: 1,
+                          minWidth: 120,
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="btn-primary"
+                        style={{ padding: '6px 14px', fontSize: '.8rem' }}
+                        onClick={() => handleAdjust(g)}
+                      >
+                        Ajustar
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-cancel"
+                        style={{ padding: '6px 14px', fontSize: '.8rem' }}
+                        onClick={() => { setAdjustFor(null); setAdjustMonto(''); }}
+                      >
+                        Cancelar
+                      </button>
+                    </>
                   ) : (
-                    <button
-                      type="button"
-                      className="btn-sm-action"
-                      onClick={() => { setContribFor(g.id); setContribMonto(''); }}
-                    >
-                      + Aportar
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        className="btn-sm-action"
+                        onClick={() => { setContribFor(g.id); setContribMonto(''); }}
+                      >
+                        + Aportar
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-sm-action"
+                        onClick={() => {
+                          setAdjustFor(g.id);
+                          setAdjustMonto(String(Number(g.monto_actual) || 0));
+                        }}
+                        title="Reemplazar el acumulado por un valor exacto"
+                      >
+                        ✎ Ajustar
+                      </button>
+                    </>
                   )}
                 </div>
               </div>

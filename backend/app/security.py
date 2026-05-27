@@ -14,10 +14,14 @@ _pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # ─── Passwords ───
 def hash_password(password: str) -> str:
+    # bcrypt solo soporta contraseñas de hasta 72 bytes; truncar siempre
+    password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return _pwd_context.hash(password)
 
 
 def verify_password(plain: str, hashed: str) -> bool:
+    # Aplicar el mismo truncamiento que en hash_password para consistencia
+    plain = plain.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return _pwd_context.verify(plain, hashed)
 
 

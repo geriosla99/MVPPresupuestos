@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import PasswordStrength from '../components/PasswordStrength';
+import { evaluatePassword } from '../utils/password';
+import logo from '../assets/logo.png';
 import '../styles/auth.css';
 
 export default function Register() {
@@ -27,8 +30,8 @@ export default function Register() {
       setError('Completa todos los campos obligatorios.');
       return;
     }
-    if (form.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
+    if (!evaluatePassword(form.password).allPassed) {
+      setError('La contraseña no cumple todos los requisitos de seguridad.');
       return;
     }
     if (form.password !== form.password2) {
@@ -59,8 +62,7 @@ export default function Register() {
     <div className="auth-shell">
       <div className="auth-card page-fade">
         <div className="auth-logo">
-          <div className="logo-icon">💰</div>
-          <div className="logo-text">Tu<span>Presupuesto</span></div>
+          <img src={logo} alt="TuPresupuesto" className="auth-logo-img" />
         </div>
 
         <h1 className="auth-title">Crea tu cuenta</h1>
@@ -104,11 +106,15 @@ export default function Register() {
               name="password"
               type="password"
               autoComplete="new-password"
-              placeholder="Mínimo 6 caracteres"
+              placeholder="Crea una contraseña segura"
               value={form.password}
               onChange={handleChange}
               disabled={submitting}
+              aria-describedby="pwd-help"
             />
+            <div id="pwd-help">
+              <PasswordStrength password={form.password} />
+            </div>
           </div>
 
           <div className="form-group">
@@ -123,6 +129,9 @@ export default function Register() {
               onChange={handleChange}
               disabled={submitting}
             />
+            {form.password2 && form.password !== form.password2 && (
+              <span className="field-hint error">Las contraseñas no coinciden.</span>
+            )}
           </div>
 
           <button className="auth-btn" type="submit" disabled={submitting}>

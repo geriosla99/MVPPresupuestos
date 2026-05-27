@@ -2,11 +2,14 @@
  * Helpers de formato — mismas reglas usadas en el mockup original.
  */
 
+// Muestra enteros sin decimales y, cuando el monto tiene decimales,
+// hasta 2 cifras decimales. Soporta montos muy pequeños y muy grandes.
 export const formatCOP = (value) =>
   new Intl.NumberFormat('es-CO', {
     style: 'currency',
     currency: 'COP',
     minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(value || 0);
 
 export const today = () => new Date().toISOString().split('T')[0];

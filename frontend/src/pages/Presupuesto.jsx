@@ -183,7 +183,8 @@ export default function Presupuesto() {
                         id={`lim-${it.categoria}`}
                         type="number"
                         min="0"
-                        step="10000"
+                        step="any"
+                        inputMode="decimal"
                         value={it.limite_mensual || ''}
                         onChange={(e) => handleLimitChange(it.categoria, e.target.value)}
                         disabled={saving}

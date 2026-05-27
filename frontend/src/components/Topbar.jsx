@@ -6,6 +6,9 @@ const TITLES = {
   '/gastos': 'Gastos',
   '/metas': 'Metas de Ahorro',
   '/presupuesto': 'Presupuesto',
+  '/reportes': 'Reportes',
+  '/configuracion': 'Configuración',
+  '/perfil': 'Perfil',
 };
 
 export default function Topbar() {

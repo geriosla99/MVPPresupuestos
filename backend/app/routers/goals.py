@@ -1,107 +1,90 @@
 """
 CRUD de metas de ahorro + endpoint de aporte.
+Documentos: users/{user_id}/goals/{goal_id}
+
 Contrato (src/api/goals.js):
   GET    /goals                        → Goal[]
   POST   /goals                        → Goal
   PUT    /goals/{id}                   → Goal
   DELETE /goals/{id}                   → 204
   POST   /goals/{id}/contribute  body: { monto } → Goal (suma a monto_actual)
+
+Nota: el frontend usa PUT /goals/{id} para "ajustar" el acumulado a un valor
+exacto (envía el goal completo con el nuevo monto_actual). Aportar suma; ajustar
+reemplaza — ambos pasan por endpoints existentes sin necesidad de uno nuevo.
 """
-from decimal import Decimal
+from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from firebase_admin import firestore as fb_fs
 
-from ..database import get_db
 from ..deps import get_current_user
-from ..models import Goal, User
-from ..schemas import ContributionIn, GoalCreate, GoalOut, GoalUpdate
+from ..firebase import goals_col, snapshot_to_dict
+from ..schemas import ContributionIn, GoalCreate, GoalOut, GoalUpdate, UserOut
 
 router = APIRouter(prefix="/goals", tags=["goals"])
 
 
+def _serialize(payload_dict: dict) -> dict:
+    """date → 'YYYY-MM-DD' (Firestore acepta strings nativamente)."""
+    fecha = payload_dict.get("fecha_limite")
+    if isinstance(fecha, date):
+        payload_dict["fecha_limite"] = fecha.isoformat()
+    return payload_dict
+
+
+def _to_out(snap) -> GoalOut:
+    return GoalOut.model_validate(snapshot_to_dict(snap))
+
+
 @router.get("", response_model=list[GoalOut])
-def list_goals(
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-):
-    return (
-        db.query(Goal)
-        .filter(Goal.user_id == user.id)
-        .order_by(Goal.id.desc())
-        .all()
-    )
+def list_goals(user: UserOut = Depends(get_current_user)):
+    docs = goals_col(user.id).get()
+    # Orden estable por fecha de creación implícita; los más nuevos arriba.
+    result = [_to_out(d) for d in docs]
+    result.sort(key=lambda g: g.id, reverse=True)
+    return result
 
 
 @router.post("", response_model=GoalOut, status_code=status.HTTP_201_CREATED)
-def create_goal(
-    payload: GoalCreate,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-):
-    goal = Goal(user_id=user.id, **payload.model_dump())
-    db.add(goal)
-    db.commit()
-    db.refresh(goal)
-    return goal
+def create_goal(payload: GoalCreate, user: UserOut = Depends(get_current_user)):
+    ref = goals_col(user.id).document()
+    ref.set(_serialize(payload.model_dump()))
+    return _to_out(ref.get())
 
 
 @router.put("/{goal_id}", response_model=GoalOut)
 def update_goal(
-    goal_id: int,
+    goal_id: str,
     payload: GoalUpdate,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ):
-    goal = (
-        db.query(Goal)
-        .filter(Goal.id == goal_id, Goal.user_id == user.id)
-        .first()
-    )
-    if not goal:
+    ref = goals_col(user.id).document(goal_id)
+    if not ref.get().exists:
         raise HTTPException(status_code=404, detail="Meta no encontrada.")
-
-    for field, value in payload.model_dump().items():
-        setattr(goal, field, value)
-    db.commit()
-    db.refresh(goal)
-    return goal
+    ref.set(_serialize(payload.model_dump()))
+    return _to_out(ref.get())
 
 
 @router.delete("/{goal_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_goal(
-    goal_id: int,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-):
-    goal = (
-        db.query(Goal)
-        .filter(Goal.id == goal_id, Goal.user_id == user.id)
-        .first()
-    )
-    if not goal:
+def delete_goal(goal_id: str, user: UserOut = Depends(get_current_user)):
+    ref = goals_col(user.id).document(goal_id)
+    if not ref.get().exists:
         raise HTTPException(status_code=404, detail="Meta no encontrada.")
-    db.delete(goal)
-    db.commit()
+    ref.delete()
 
 
 @router.post("/{goal_id}/contribute", response_model=GoalOut)
 def contribute(
-    goal_id: int,
+    goal_id: str,
     payload: ContributionIn,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserOut = Depends(get_current_user),
 ):
-    goal = (
-        db.query(Goal)
-        .filter(Goal.id == goal_id, Goal.user_id == user.id)
-        .first()
-    )
-    if not goal:
+    ref = goals_col(user.id).document(goal_id)
+    if not ref.get().exists:
         raise HTTPException(status_code=404, detail="Meta no encontrada.")
 
-    goal.monto_actual = (Decimal(str(goal.monto_actual or 0))
-                         + Decimal(str(payload.monto)))
-    db.commit()
-    db.refresh(goal)
-    return goal
+    # firestore.Increment hace la suma de forma atómica en el servidor — más
+    # seguro que leer + sumar + escribir si hubiera concurrencia.
+    ref.update({"monto_actual": fb_fs.Increment(float(payload.monto))})
+    return _to_out(ref.get())

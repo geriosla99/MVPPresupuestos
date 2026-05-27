@@ -8,6 +8,7 @@ import api from './axios';
  *   POST   /transactions                            → Transaction
  *   PUT    /transactions/{id}                       → Transaction
  *   DELETE /transactions/{id}                       → 204
+ *   DELETE /transactions                            → 204  (borra todos)
  *
  *   GET    /summary?month=YYYY-MM                   → { ingresos, gastos, balance, by_category }
  *   GET    /summary/monthly?months=4                → [{ month, ingresos, gastos }]
@@ -28,6 +29,8 @@ export const transactionsApi = {
   update: (id, data) => api.put(`/transactions/${id}`, data).then((r) => r.data),
 
   remove: (id) => api.delete(`/transactions/${id}`),
+
+  removeAll: () => api.delete('/transactions'),
 };
 
 export const summaryApi = {

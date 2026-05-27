@@ -8,7 +8,7 @@
 .nav {
   width: 240px;
   flex-shrink: 0;
-  background: var(--navy);
+  background: #014a29;
   display: flex;
   flex-direction: column;
   padding: 24px 16px;

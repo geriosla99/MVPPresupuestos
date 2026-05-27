@@ -1,14 +1,17 @@
 /* ─── DESIGN TOKENS ─── */
 /* Variables CSS reutilizables en toda la app */
 :root {
-  /* Colores principales */
-  --navy:   #0A2342;
-  --teal:   #028090;
-  --mint:   #02C39A;
-  --amber:  #F59E0B;
-  --rose:   #F43F5E;
+  /* Colores principales — alineados con el logo TuPresupuesto */
+  --navy:   #1E3A8A;   /* azul del celular del logo */
+  --teal:   #1C863A;   /* verde oscuro del billete */
+  --mint:   #1EA64A;   /* verde principal de la marca (flecha + "Tu") */
+  --amber:  #FBBF24;   /* amarillo de las barras del logo */
+  --rose:   #F43F5E;   /* rojo semántico para gastos/errores */
   --violet: #7C3AED;
-  --ocean:  #0EA5E9;
+  --ocean:  #5C97F6;   /* azul claro de la pantalla del celular */
+
+  /* Sombras coherentes con el navy de marca */
+  --shadow-color: 30, 58, 138;
 
   /* Superficies */
   --bg:     #F0F4F8;
@@ -19,8 +22,8 @@
 
   /* Forma */
   --radius: 16px;
-  --shadow: 0 2px 16px rgba(10, 35, 66, .08);
-  --shadow-hover: 0 8px 32px rgba(10, 35, 66, .12);
+  --shadow: 0 2px 16px rgba(var(--shadow-color), .08);
+  --shadow-hover: 0 8px 32px rgba(var(--shadow-color), .12);
 }
 
 * , *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

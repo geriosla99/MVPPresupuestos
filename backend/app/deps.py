@@ -1,41 +1,45 @@
 """
-Dependencias compartidas entre routers — principalmente `get_current_user`,
-que extrae el JWT del header Authorization y devuelve el User correspondiente.
+Dependencias compartidas entre routers. La principal es `get_current_user`,
+que extrae el JWT del header Authorization y devuelve el usuario asociado
+leyendo el documento correspondiente en Firestore.
+
+Se usa `HTTPBearer` (en lugar de `OAuth2PasswordBearer`) para que el botón
+"Authorize" de Swagger UI sólo pida pegar el token, sin un formulario de
+usuario/contraseña que no encaja con nuestro login JSON.
 """
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from .database import get_db
-from .models import User
+from .firebase import user_doc
+from .schemas import UserOut
 from .security import decode_access_token
 
-# tokenUrl es informativo; nuestro flujo real está en /api/auth/login
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
+bearer_scheme = HTTPBearer(
+    bearerFormat="JWT",
+    description="Token JWT obtenido en POST /api/auth/login (campo access_token).",
+    auto_error=False,
+)
 
 
 def get_current_user(
-    token: str | None = Depends(oauth2_scheme),
-    db: Session = Depends(get_db),
-) -> User:
+    creds: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+) -> UserOut:
     creds_error = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="No autenticado",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    if not token:
+    if not creds or not creds.credentials:
         raise creds_error
 
-    payload = decode_access_token(token)
+    payload = decode_access_token(creds.credentials)
     if not payload or "sub" not in payload:
         raise creds_error
 
-    try:
-        user_id = int(payload["sub"])
-    except (TypeError, ValueError):
+    user_id = str(payload["sub"])
+    snap = user_doc(user_id).get()
+    if not snap.exists:
         raise creds_error
 
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise creds_error
-    return user
+    data = snap.to_dict() or {}
+    return UserOut(id=snap.id, email=data.get("email"), nombre=data.get("nombre"))

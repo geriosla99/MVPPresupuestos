@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import marca from '../assets/marca.png';
 import '../styles/auth.css';
 
 export default function Login() {
@@ -44,8 +45,7 @@ export default function Login() {
     <div className="auth-shell">
       <div className="auth-card page-fade">
         <div className="auth-logo">
-          <div className="logo-icon">💰</div>
-          <div className="logo-text">Tu<span>Presupuesto</span></div>
+          <img src={marca} alt="TuPresupuesto" className="auth-logo-img" />
         </div>
 
         <h1 className="auth-title">Bienvenido de vuelta</h1>
