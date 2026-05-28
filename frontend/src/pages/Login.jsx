@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import PasswordInput from '../components/PasswordInput';
 import marca from '../assets/marca.png';
 import '../styles/auth.css';
 
@@ -70,10 +71,9 @@ export default function Login() {
 
           <div className="form-group">
             <label htmlFor="password">Contraseña</label>
-            <input
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               autoComplete="current-password"
               placeholder="••••••••"
               value={form.password}

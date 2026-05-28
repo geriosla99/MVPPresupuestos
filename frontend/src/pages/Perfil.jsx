@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/auth';
 import PasswordStrength from '../components/PasswordStrength';
+import PasswordInput from '../components/PasswordInput';
 import { evaluatePassword } from '../utils/password';
 import {
   getReminderPrefs,
@@ -152,10 +153,9 @@ export default function Perfil() {
 
         <div className="form-group">
           <label htmlFor="current_password">Contraseña actual</label>
-          <input
+          <PasswordInput
             id="current_password"
             name="current_password"
-            type="password"
             autoComplete="current-password"
             value={pwd.current_password}
             onChange={handlePwdChange}
@@ -166,10 +166,9 @@ export default function Perfil() {
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="new_password">Nueva contraseña</label>
-            <input
+            <PasswordInput
               id="new_password"
               name="new_password"
-              type="password"
               autoComplete="new-password"
               value={pwd.new_password}
               onChange={handlePwdChange}
@@ -180,10 +179,9 @@ export default function Perfil() {
 
           <div className="form-group">
             <label htmlFor="confirm">Confirmar nueva contraseña</label>
-            <input
+            <PasswordInput
               id="confirm"
               name="confirm"
-              type="password"
               autoComplete="new-password"
               value={pwd.confirm}
               onChange={handlePwdChange}

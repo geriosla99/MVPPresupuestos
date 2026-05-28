@@ -7,7 +7,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     # Firebase / Firestore
     FIREBASE_PROJECT_ID: str = "tupresupuesto-901b0"
+    # Ruta al JSON de credenciales (uso local / desarrollo)
     FIREBASE_CREDENTIALS_PATH: str = "firebase-credentials.json"
+    # Contenido JSON de las credenciales pegado como string (uso en serverless:
+    # Vercel, Cloud Run, etc., donde no se puede subir un archivo).
+    FIREBASE_CREDENTIALS_JSON: str = ""
 
     # JWT
     SECRET_KEY: str = "cambia-esto-por-una-cadena-secreta-muy-larga-y-aleatoria"

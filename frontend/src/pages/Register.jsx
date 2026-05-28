@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PasswordStrength from '../components/PasswordStrength';
+import PasswordInput from '../components/PasswordInput';
 import { evaluatePassword } from '../utils/password';
 import logo from '../assets/logo.png';
 import '../styles/auth.css';
@@ -101,10 +102,9 @@ export default function Register() {
 
           <div className="form-group">
             <label htmlFor="password">Contraseña</label>
-            <input
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               autoComplete="new-password"
               placeholder="Crea una contraseña segura"
               value={form.password}
@@ -119,10 +119,9 @@ export default function Register() {
 
           <div className="form-group">
             <label htmlFor="password2">Confirma la contraseña</label>
-            <input
+            <PasswordInput
               id="password2"
               name="password2"
-              type="password"
               autoComplete="new-password"
               placeholder="Repite tu contraseña"
               value={form.password2}

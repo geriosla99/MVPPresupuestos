@@ -18,6 +18,7 @@ Estructura de datos en Firestore (NoSQL):
 Las subcolecciones por usuario aíslan los datos y simplifican las consultas y
 las reglas de seguridad de Firestore.
 """
+import json
 import os
 
 import firebase_admin
@@ -27,18 +28,36 @@ from .config import settings
 
 
 def _init_firebase() -> None:
-    """Inicializa la app de Firebase una sola vez."""
+    """
+    Inicializa la app de Firebase una sola vez. Soporta tres modos, en este orden:
+      1) FIREBASE_CREDENTIALS_JSON  → contenido JSON pegado como string (Vercel/serverless).
+      2) FIREBASE_CREDENTIALS_PATH  → archivo .json local (desarrollo / Railway con secret file).
+      3) ApplicationDefault         → variable GOOGLE_APPLICATION_CREDENTIALS o credenciales
+                                       implícitas del entorno (Cloud Run, GCE).
+    """
     if firebase_admin._apps:
         return
 
-    cred_path = settings.FIREBASE_CREDENTIALS_PATH
+    cred = None
 
-    if cred_path and os.path.exists(cred_path):
-        # Credenciales explícitas desde un archivo JSON
-        cred = credentials.Certificate(cred_path)
-    else:
-        # Fallback: usa GOOGLE_APPLICATION_CREDENTIALS o las credenciales por
-        # defecto del entorno (Cloud Run, etc.)
+    # 1) Credenciales como string JSON (env var) — ideal para serverless
+    json_str = (settings.FIREBASE_CREDENTIALS_JSON or "").strip()
+    if json_str:
+        try:
+            cred = credentials.Certificate(json.loads(json_str))
+        except Exception as e:
+            raise RuntimeError(
+                "FIREBASE_CREDENTIALS_JSON está definido pero no es un JSON válido: " + str(e)
+            )
+
+    # 2) Credenciales desde archivo
+    if cred is None:
+        cred_path = settings.FIREBASE_CREDENTIALS_PATH
+        if cred_path and os.path.exists(cred_path):
+            cred = credentials.Certificate(cred_path)
+
+    # 3) Application Default Credentials
+    if cred is None:
         cred = credentials.ApplicationDefault()
 
     firebase_admin.initialize_app(cred, {"projectId": settings.FIREBASE_PROJECT_ID})

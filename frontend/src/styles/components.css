@@ -513,3 +513,30 @@ a.user-chip:hover { background: rgba(255, 255, 255, .07); }
   height: 2.875rem; width: auto; max-width: 100%;
   display: block;
 }
+
+/* ─── Input de contraseña con ojo (mostrar / ocultar) ─── */
+.pwd-input {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+.pwd-input input {
+  flex: 1;
+  padding-right: 42px;  /* espacio para el botón del ojo */
+}
+.pwd-toggle {
+  position: absolute;
+  right: 6px; top: 50%;
+  transform: translateY(-50%);
+  width: 32px; height: 32px;
+  border: none; background: transparent;
+  font-size: 1.05rem; cursor: pointer;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  color: var(--muted);
+  transition: background .15s, color .15s;
+}
+.pwd-toggle:hover { background: var(--bg); color: var(--text); }
+.pwd-toggle:focus-visible {
+  outline: 2px solid var(--teal); outline-offset: 1px;
+}
