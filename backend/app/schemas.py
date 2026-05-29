@@ -5,6 +5,7 @@ Coinciden con los contratos descritos en el frontend (src/api/*.js).
 Nota: Firestore usa IDs de tipo string para los documentos, por eso los campos
 `id` se declaran como str (en la versión SQL eran enteros autoincrementales).
 """
+from __future__ import annotations
 import re
 from datetime import date
 from typing import Literal, Optional

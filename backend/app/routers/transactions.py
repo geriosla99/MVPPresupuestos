@@ -12,6 +12,7 @@ Contrato (src/api/transactions.js):
   PUT    /transactions/{id}                   → Transaction
   DELETE /transactions/{id}                   → 204
 """
+from __future__ import annotations
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status

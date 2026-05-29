@@ -10,6 +10,7 @@ Las herramientas de documentación interactiva quedan disponibles en:
     http://localhost:8000/redoc    → ReDoc (alternativa más legible)
     http://localhost:8000/openapi.json → contrato OpenAPI 3.1 sin procesar
 """
+from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

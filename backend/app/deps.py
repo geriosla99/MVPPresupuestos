@@ -7,6 +7,7 @@ Se usa `HTTPBearer` (en lugar de `OAuth2PasswordBearer`) para que el botón
 "Authorize" de Swagger UI sólo pida pegar el token, sin un formulario de
 usuario/contraseña que no encaja con nuestro login JSON.
 """
+from __future__ import annotations
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 

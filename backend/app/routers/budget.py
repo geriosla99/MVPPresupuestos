@@ -10,6 +10,7 @@ Contrato (src/api/budget.js):
 Cada BudgetItemOut incluye `gastado`, calculado en vivo a partir de las
 transacciones tipo='gasto' del usuario para esa categoría y mes.
 """
+from __future__ import annotations
 from datetime import date
 from typing import Optional
 

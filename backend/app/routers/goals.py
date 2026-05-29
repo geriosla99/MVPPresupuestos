@@ -13,6 +13,7 @@ Nota: el frontend usa PUT /goals/{id} para "ajustar" el acumulado a un valor
 exacto (envía el goal completo con el nuevo monto_actual). Aportar suma; ajustar
 reemplaza — ambos pasan por endpoints existentes sin necesidad de uno nuevo.
 """
+from __future__ import annotations
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, status

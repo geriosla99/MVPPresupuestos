@@ -1,6 +1,7 @@
 """
 Funciones de seguridad: hashing de password (bcrypt) y emisión/validación de JWT.
 """
+from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Any
 

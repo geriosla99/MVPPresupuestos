@@ -8,6 +8,7 @@ Para que esto funcione en Vercel debe definirse la variable de entorno
 FIREBASE_CREDENTIALS_JSON con el contenido completo del JSON de credenciales
 de servicio (un solo string).
 """
+from __future__ import annotations
 import os
 import sys
 

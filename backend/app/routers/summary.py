@@ -8,6 +8,7 @@ el volumen es pequeño y este enfoque es totalmente suficiente.
   GET /summary?month=YYYY-MM       → { ingresos, gastos, balance, by_category }
   GET /summary/monthly?months=4    → [{ month, ingresos, gastos }, ...]
 """
+from __future__ import annotations
 from collections import defaultdict
 from datetime import date
 from typing import Optional

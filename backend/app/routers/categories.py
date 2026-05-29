@@ -11,6 +11,7 @@ Contrato (src/api/categories.js):
   PUT    /categories/{id}                   → Category
   DELETE /categories/{id}                   → 204
 """
+from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from ..deps import get_current_user

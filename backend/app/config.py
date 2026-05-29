@@ -1,6 +1,7 @@
 """
 Configuración global cargada desde el .env (Pydantic Settings).
 """
+from __future__ import annotations
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

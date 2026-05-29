@@ -18,6 +18,7 @@ Estructura de datos en Firestore (NoSQL):
 Las subcolecciones por usuario aíslan los datos y simplifican las consultas y
 las reglas de seguridad de Firestore.
 """
+from __future__ import annotations
 import json
 import os
 
