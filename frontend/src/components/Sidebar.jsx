@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import marca from '../assets/marca.png';
+import logoBlanco from '../assets/logo-blanco.png';
 
 const NAV_PRINCIPAL = [
   { to: '/dashboard',   icon: '🏠', label: 'Dashboard' },
@@ -35,7 +35,7 @@ export default function Sidebar() {
   return (
     <nav className="nav">
       <div className="nav-logo">
-        <img src={marca} alt="" className="nav-logo-img" />
+        <img src={logoBlanco} alt="TuPresupuesto" className="nav-logo-img" />
       </div>
 
       <div className="nav-scroll">

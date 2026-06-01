@@ -64,10 +64,37 @@ def _init_firebase() -> None:
     firebase_admin.initialize_app(cred, {"projectId": settings.FIREBASE_PROJECT_ID})
 
 
-_init_firebase()
+# Estado de inicialización (para diagnóstico)
+_init_error: str | None = None
+db = None  # type: ignore
 
-# Cliente único de Firestore, reutilizable en todos los routers
-db = firestore.client()
+try:
+    _init_firebase()
+    db = firestore.client()
+except Exception as _e:
+    # NO levantamos la excepción para que la función serverless pueda arrancar
+    # y al menos responder /health. Los endpoints que toquen Firestore
+    # devolverán 503 cuando db sea None.
+    import traceback
+    _init_error = f"{type(_e).__name__}: {_e}"
+    print("FIREBASE_INIT_FAILED:", _init_error)
+    traceback.print_exc()
+
+
+def firebase_status() -> dict:
+    """Devuelve el estado de inicialización de Firebase para /health."""
+    if (settings.FIREBASE_CREDENTIALS_JSON or "").strip():
+        mode = "json_env"
+    elif settings.FIREBASE_CREDENTIALS_PATH and os.path.exists(settings.FIREBASE_CREDENTIALS_PATH):
+        mode = "file"
+    else:
+        mode = "application_default"
+    return {
+        "initialized": db is not None,
+        "error": _init_error,
+        "project": settings.FIREBASE_PROJECT_ID,
+        "credentials_mode": mode,
+    }
 
 
 # ─── Helpers de acceso a colecciones ───

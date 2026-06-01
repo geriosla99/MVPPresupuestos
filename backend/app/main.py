@@ -15,7 +15,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .firebase import db  # noqa: F401 — fuerza la inicialización de Firebase
+from .firebase import db, firebase_status  # noqa: F401 — fuerza la inicialización de Firebase
 from .routers import auth, budget, categories, goals, summary, transactions
 
 # ─── Metadatos OpenAPI ───
@@ -97,9 +97,13 @@ app = FastAPI(
 )
 
 # ─── CORS ───
+# Acepta los orígenes configurados explícitamente en BACKEND_CORS_ORIGINS y,
+# además, cualquier subdominio *.vercel.app (cubre el deploy de producción del
+# frontend y los preview deploys que Vercel genera por cada commit).
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
+    allow_origin_regex=r"https://[a-zA-Z0-9-]+\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -129,4 +133,10 @@ def root():
 
 @app.get("/health", tags=["meta"], summary="Health-check")
 def health():
-    return {"status": "ok"}
+    """Devuelve OK siempre que la función arranque, e incluye el estado de Firebase para diagnóstico."""
+    fb = firebase_status()
+    return {
+        "status":  "ok" if fb["initialized"] else "degraded",
+        "service": "TuPresupuesto API",
+        "firebase": fb,
+    }

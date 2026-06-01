@@ -3,7 +3,7 @@
 :root {
   /* Colores principales — alineados con el logo TuPresupuesto */
   --navy:   #1E3A8A;   /* azul del celular del logo */
-  --teal:   #1C863A;   /* verde oscuro del billete */
+  --teal:   #028090;   /* teal/petróleo: no clashea con el azul oscuro del wordmark */
   --mint:   #1EA64A;   /* verde principal de la marca (flecha + "Tu") */
   --amber:  #FBBF24;   /* amarillo de las barras del logo */
   --rose:   #F43F5E;   /* rojo semántico para gastos/errores */
