@@ -1,29 +1,41 @@
 """
 Funciones de seguridad: hashing de password (bcrypt) y emisión/validación de JWT.
+
+Usamos `bcrypt` directamente en vez de `passlib` porque passlib (sin
+mantenimiento activo) es incompatible con bcrypt >= 4.0 (rompe en la
+verificación de "wrap bug" durante la inicialización del backend).
 """
 from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from .config import settings
 
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 # ─── Passwords ───
+def _truncate_to_72(password: str) -> bytes:
+    """bcrypt solo soporta contraseñas de hasta 72 bytes; truncar de forma segura."""
+    return password.encode("utf-8")[:72]
+
+
 def hash_password(password: str) -> str:
-    # bcrypt solo soporta contraseñas de hasta 72 bytes; truncar siempre
-    password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
-    return _pwd_context.hash(password)
+    """Devuelve el hash bcrypt en formato string (utf-8)."""
+    hashed = bcrypt.hashpw(_truncate_to_72(password), bcrypt.gensalt())
+    return hashed.decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    # Aplicar el mismo truncamiento que en hash_password para consistencia
-    plain = plain.encode('utf-8')[:72].decode('utf-8', errors='ignore')
-    return _pwd_context.verify(plain, hashed)
+    """Verifica un password contra su hash. Devuelve False si el hash es inválido."""
+    if not hashed:
+        return False
+    try:
+        return bcrypt.checkpw(_truncate_to_72(plain), hashed.encode("utf-8"))
+    except ValueError:
+        # hash mal formado u otra inconsistencia → tratamos como no-match
+        return False
 
 
 # ─── JWT ───
