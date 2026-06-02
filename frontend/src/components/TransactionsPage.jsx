@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { transactionsApi } from '../api/transactions';
 import { categoriesApi } from '../api/categories';
-import { formatCOP, formatDate, getCat, today } from '../utils/format';
+import { formatCOP, formatDate, getCat, today, startOfYear, maxDate } from '../utils/format';
 
 /**
  * Página genérica de transacciones (Ingresos o Gastos).
@@ -217,6 +217,8 @@ export default function TransactionsPage({ tipo, categorias, accentClass }) {
               id="fecha"
               name="fecha"
               type="date"
+              min={startOfYear()}
+              max={maxDate(10)}
               value={form.fecha}
               onChange={handleChange}
               disabled={submitting}

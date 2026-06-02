@@ -14,6 +14,28 @@ export const formatCOP = (value) =>
 
 export const today = () => new Date().toISOString().split('T')[0];
 
+/**
+ * Fecha mínima permitida en los formularios (ingresos, gastos, metas):
+ * 1° de enero del año en curso. Evita registrar movimientos en años
+ * anteriores y mantiene los datos coherentes con el resumen anual.
+ */
+export const startOfYear = () => {
+  const y = new Date().getFullYear();
+  return `${y}-01-01`;
+};
+
+/**
+ * Fecha máxima permitida en los formularios: hoy + N años (por defecto 10).
+ * Útil para planificación a largo plazo (metas de ahorro, ingresos
+ * programados, gastos recurrentes) sin abrir la puerta a errores
+ * tipográficos con fechas absurdas (ej. año 9999).
+ */
+export const maxDate = (years = 10) => {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() + years);
+  return d.toISOString().split('T')[0];
+};
+
 export const formatDate = (iso) => {
   if (!iso) return '';
   const d = new Date(iso);

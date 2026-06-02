@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { goalsApi } from '../api/goals';
-import { formatCOP, formatDate, today } from '../utils/format';
+import { formatCOP, formatDate, startOfYear, maxDate } from '../utils/format';
 
 const ICONOS_METAS = ['🎯', '✈️', '🏠', '🚗', '🎓', '💍', '💻', '🏖️', '🎁', '📈'];
 
@@ -239,7 +239,8 @@ export default function Metas() {
               id="fecha_limite"
               name="fecha_limite"
               type="date"
-              min={today()}
+              min={startOfYear()}
+              max={maxDate(10)}
               value={form.fecha_limite}
               onChange={handleChange}
               disabled={submitting}
