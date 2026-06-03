@@ -267,6 +267,31 @@ export default function Perfil() {
         )}
       </div>
 
+      {/* Tutorial / Onboarding */}
+      <div className="form-card">
+        <h3>🎓 Tutorial de bienvenida</h3>
+        <p className="card-help">
+          Vuelve a ver el recorrido guiado de la app. Útil si necesitas
+          recordar dónde está cada funcionalidad o quieres mostrársela a alguien.
+        </p>
+        <div className="form-actions">
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              if (user?.id) {
+                localStorage.removeItem(`tp_onboarding_done_${user.id}`);
+              }
+              navigate('/dashboard');
+              // Pequeño reload para que el componente Onboarding re-evalúe el flag.
+              setTimeout(() => window.location.reload(), 100);
+            }}
+          >
+            Mostrar tutorial otra vez
+          </button>
+        </div>
+      </div>
+
       {/* Eliminar cuenta */}
       <div className="form-card danger-zone">
         <h3>🗑 Eliminar cuenta</h3>
@@ -304,4 +329,41 @@ export default function Perfil() {
       </div>
     </div>
   );
+}
+        </p>
+
+        {delErr && <div className="alert-banner danger">⚠️ {delErr}</div>}
+
+        <div className="form-group">
+          <label htmlFor="confirm-del">
+            Escribe <strong>ELIMINAR</strong> para confirmar
+          </label>
+          <input
+            id="confirm-del"
+            type="text"
+            placeholder="ELIMINAR"
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            disabled={delBusy}
+          />
+        </div>
+
+        <div className="form-actions">
+          <button
+            type="button"
+            className="btn-danger"
+            onClick={deleteAccount}
+            disabled={confirmText !== 'ELIMINAR' || delBusy}
+          >
+            {delBusy ? 'Eliminando…' : 'Eliminar mi cuenta definitivamente'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+      </div>
+    </div>
+  );
+}
 }

@@ -1,0 +1,343 @@
+import { useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import logo from '../assets/logo.png';
+import '../styles/landing.css';
+
+/**
+ * Landing pública en /
+ *  - Si el usuario ya tiene sesión activa, redirige a /dashboard.
+ *  - Si no, muestra hero + sección de valor + cómo funciona + CTAs a Login/Registro.
+ *
+ * Mantiene un look limpio y profesional, alineado con la paleta de marca
+ * (navy + mint + amber). Pensado mobile-first y accesible.
+ */
+export default function Landing() {
+  const { isAuthenticated, loading } = useAuth();
+  const navigate = useNavigate();
+
+  // Si la sesión ya está, no hay landing — al dashboard.
+  useEffect(() => {
+    if (!loading && isAuthenticated) navigate('/dashboard', { replace: true });
+  }, [loading, isAuthenticated, navigate]);
+
+  // Si todavía está cargando la sesión, mostramos placeholder mínimo
+  // (evita un parpadeo de la landing antes de la redirección).
+  if (loading) {
+    return <div className="landing-loading">Cargando…</div>;
+  }
+
+  return (
+    <div className="landing">
+      {/* ─── HEADER ─── */}
+      <header className="landing-header">
+        <div className="landing-container landing-nav">
+          <Link to="/" className="landing-brand">
+            <img src={logo} alt="TuPresupuesto" className="landing-logo" />
+          </Link>
+          <nav className="landing-nav-links">
+            <a href="#features" className="landing-nav-link">Funcionalidades</a>
+            <a href="#como-funciona" className="landing-nav-link">Cómo funciona</a>
+            <a href="#preguntas" className="landing-nav-link">Preguntas</a>
+            <Link to="/login" className="landing-nav-link landing-nav-link-secondary">
+              Iniciar sesión
+            </Link>
+            <Link to="/register" className="landing-btn landing-btn-primary">
+              Crear cuenta gratis
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      {/* ─── HERO ─── */}
+      <section className="landing-hero">
+        <div className="landing-container landing-hero-grid">
+          <div className="landing-hero-content">
+            <span className="landing-pill">100% gratis · sin tarjeta · pensado para Colombia</span>
+            <h1 className="landing-hero-title">
+              Tu economía,{' '}
+              <span className="landing-hero-accent">en orden</span>
+            </h1>
+            <p className="landing-hero-subtitle">
+              TuPresupuesto te ayuda a registrar tus ingresos y gastos, planificar tu
+              presupuesto mensual y alcanzar tus metas de ahorro. Sencillo, sin curva
+              de aprendizaje, todo en pesos colombianos.
+            </p>
+            <div className="landing-hero-ctas">
+              <Link to="/register" className="landing-btn landing-btn-primary landing-btn-lg">
+                Empezar ahora
+              </Link>
+              <Link to="/login" className="landing-btn landing-btn-outline landing-btn-lg">
+                Ya tengo cuenta
+              </Link>
+            </div>
+            <ul className="landing-hero-bullets">
+              <li>✓ Tus datos quedan privados y cifrados</li>
+              <li>✓ Funciona en celular, tablet y computador</li>
+              <li>✓ Instálala como app desde el navegador</li>
+            </ul>
+          </div>
+
+          <div className="landing-hero-visual">
+            {/* Mockup del dashboard hecho con CSS, sin imagen externa */}
+            <div className="landing-mock">
+              <div className="landing-mock-bar">
+                <span className="landing-mock-dot" style={{ background: '#F43F5E' }}></span>
+                <span className="landing-mock-dot" style={{ background: '#FBBF24' }}></span>
+                <span className="landing-mock-dot" style={{ background: '#1EA64A' }}></span>
+              </div>
+              <div className="landing-mock-body">
+                <div className="landing-mock-title">Resumen de junio</div>
+                <div className="landing-mock-stats">
+                  <div className="landing-mock-stat landing-mock-stat-in">
+                    <span className="landing-mock-stat-label">Ingresos</span>
+                    <span className="landing-mock-stat-value">$ 3.420.000</span>
+                  </div>
+                  <div className="landing-mock-stat landing-mock-stat-out">
+                    <span className="landing-mock-stat-label">Gastos</span>
+                    <span className="landing-mock-stat-value">$ 1.870.000</span>
+                  </div>
+                  <div className="landing-mock-stat landing-mock-stat-save">
+                    <span className="landing-mock-stat-label">Saldo</span>
+                    <span className="landing-mock-stat-value">$ 1.550.000</span>
+                  </div>
+                </div>
+                <div className="landing-mock-categories">
+                  <div className="landing-mock-cat-title">Gastos por categoría</div>
+                  <div className="landing-mock-cat-row">
+                    <span>🏠 Vivienda</span>
+                    <div className="landing-mock-bar-track"><div className="landing-mock-bar-fill" style={{ width: '60%', background: '#7C3AED' }}></div></div>
+                    <span className="landing-mock-cat-val">$ 750k</span>
+                  </div>
+                  <div className="landing-mock-cat-row">
+                    <span>🛒 Alimentación</span>
+                    <div className="landing-mock-bar-track"><div className="landing-mock-bar-fill" style={{ width: '45%', background: '#1EA64A' }}></div></div>
+                    <span className="landing-mock-cat-val">$ 540k</span>
+                  </div>
+                  <div className="landing-mock-cat-row">
+                    <span>🚌 Transporte</span>
+                    <div className="landing-mock-bar-track"><div className="landing-mock-bar-fill" style={{ width: '30%', background: '#5C97F6' }}></div></div>
+                    <span className="landing-mock-cat-val">$ 320k</span>
+                  </div>
+                  <div className="landing-mock-cat-row">
+                    <span>🎮 Ocio</span>
+                    <div className="landing-mock-bar-track"><div className="landing-mock-bar-fill" style={{ width: '20%', background: '#FBBF24' }}></div></div>
+                    <span className="landing-mock-cat-val">$ 260k</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── STATS ─── */}
+      <section className="landing-stats">
+        <div className="landing-container landing-stats-grid">
+          <div>
+            <div className="landing-stat-value">3 toques</div>
+            <div className="landing-stat-label">para registrar un movimiento</div>
+          </div>
+          <div>
+            <div className="landing-stat-value">$0</div>
+            <div className="landing-stat-label">costo de usar la app</div>
+          </div>
+          <div>
+            <div className="landing-stat-value">PWA</div>
+            <div className="landing-stat-label">instálala como app nativa</div>
+          </div>
+          <div>
+            <div className="landing-stat-value">COP</div>
+            <div className="landing-stat-label">pesos colombianos</div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FEATURES ─── */}
+      <section id="features" className="landing-features">
+        <div className="landing-container">
+          <h2 className="landing-section-title">Todo lo que necesitas para tomar el control</h2>
+          <p className="landing-section-subtitle">
+            Las funciones esenciales del cuidado financiero, en una sola app.
+          </p>
+
+          <div className="landing-features-grid">
+            <FeatureCard
+              icon="💵"
+              color="var(--mint)"
+              title="Registra movimientos"
+              desc="Captura ingresos y gastos con descripción, categoría, fecha y nota en menos de un minuto."
+            />
+            <FeatureCard
+              icon="🎯"
+              color="var(--teal)"
+              title="Metas de ahorro"
+              desc="Crea metas con monto objetivo y fecha límite. Aporta y ajusta tu progreso visualmente."
+            />
+            <FeatureCard
+              icon="📊"
+              color="var(--amber)"
+              title="Presupuesto mensual"
+              desc="Establece límites por categoría y recibe alertas visuales cuando estés cerca del tope."
+            />
+            <FeatureCard
+              icon="📈"
+              color="var(--navy)"
+              title="Reportes claros"
+              desc="Resumen mensual, comparativo vs mes anterior y tendencias de gasto por categoría."
+            />
+            <FeatureCard
+              icon="🔒"
+              color="var(--rose)"
+              title="Seguridad real"
+              desc="Cifrado HTTPS, contraseñas con bcrypt, JWT firmado y aislamiento de datos por usuario."
+            />
+            <FeatureCard
+              icon="📱"
+              color="var(--ocean)"
+              title="PWA instalable"
+              desc="Instálala desde el navegador en tu celular como una app nativa. Funciona offline parcial."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CÓMO FUNCIONA ─── */}
+      <section id="como-funciona" className="landing-how">
+        <div className="landing-container">
+          <h2 className="landing-section-title">Cómo funciona</h2>
+          <p className="landing-section-subtitle">Tres pasos para empezar a tener tu economía en orden.</p>
+
+          <div className="landing-how-steps">
+            <StepCard
+              number="1"
+              title="Crea tu cuenta"
+              desc="Regístrate con tu correo en menos de 30 segundos. Tu información queda privada."
+              color="var(--mint)"
+            />
+            <StepCard
+              number="2"
+              title="Registra tus movimientos"
+              desc="Captura tus ingresos y gastos en el día a día. Crea categorías personalizadas."
+              color="var(--teal)"
+            />
+            <StepCard
+              number="3"
+              title="Planifica y ahorra"
+              desc="Define tu presupuesto, fija metas de ahorro y mira cómo evoluciona tu economía mes a mes."
+              color="var(--navy)"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FAQ ─── */}
+      <section id="preguntas" className="landing-faq">
+        <div className="landing-container">
+          <h2 className="landing-section-title">Preguntas frecuentes</h2>
+
+          <div className="landing-faq-list">
+            <FaqItem
+              q="¿TuPresupuesto es realmente gratis?"
+              a="Sí. La versión actual del producto es 100 % gratuita, sin tarjeta de crédito, sin limitaciones de uso. Es un proyecto académico de la Corporación Universitaria Iberoamericana."
+            />
+            <FaqItem
+              q="¿Mis datos están seguros?"
+              a="Sí. La aplicación usa HTTPS forzado, contraseñas cifradas con bcrypt y tokens JWT firmados. Tu información queda aislada en Firebase Firestore y solo tú puedes acceder a ella."
+            />
+            <FaqItem
+              q="¿Funciona en mi celular?"
+              a="Sí. Es una PWA (Progressive Web App) que puedes instalar desde el navegador de tu celular como si fuera una app nativa. Compatible con Android e iOS."
+            />
+            <FaqItem
+              q="¿Necesito conocimientos financieros para usarla?"
+              a="No. TuPresupuesto está pensada para cualquier persona, sin importar su experiencia financiera. La interfaz es clara y guiada paso a paso."
+            />
+            <FaqItem
+              q="¿Puedo conectarla con mi cuenta bancaria?"
+              a="Aún no. En esta versión los movimientos se registran manualmente. La integración con bancos vía Open Banking está en el roadmap para futuras iteraciones."
+            />
+            <FaqItem
+              q="¿Cómo elimino mi cuenta y mis datos?"
+              a="Desde tu perfil puedes eliminar tu cuenta en cualquier momento. La eliminación borra en cascada todos tus movimientos, metas, presupuestos y categorías de forma irreversible."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CTA FINAL ─── */}
+      <section className="landing-cta">
+        <div className="landing-container">
+          <div className="landing-cta-box">
+            <h2>Listo para tomar el control de tu economía</h2>
+            <p>Empieza hoy mismo. No tomes decisiones financieras a ciegas.</p>
+            <Link to="/register" className="landing-btn landing-btn-light landing-btn-lg">
+              Crear mi cuenta gratis
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FOOTER ─── */}
+      <footer className="landing-footer">
+        <div className="landing-container landing-footer-grid">
+          <div>
+            <img src={logo} alt="TuPresupuesto" className="landing-footer-logo" />
+            <p className="landing-footer-tagline">Tu economía, en orden.</p>
+          </div>
+          <div>
+            <h4>Producto</h4>
+            <a href="#features">Funcionalidades</a>
+            <a href="#como-funciona">Cómo funciona</a>
+            <a href="#preguntas">Preguntas frecuentes</a>
+          </div>
+          <div>
+            <h4>Cuenta</h4>
+            <Link to="/login">Iniciar sesión</Link>
+            <Link to="/register">Crear cuenta</Link>
+          </div>
+          <div>
+            <h4>Académico</h4>
+            <span>Corporación Universitaria</span>
+            <span>Iberoamericana</span>
+            <span>Proyecto de Software · 2026</span>
+          </div>
+        </div>
+        <div className="landing-footer-bottom">
+          <span>© 2026 TuPresupuesto · Proyecto académico de Geraldine Rios</span>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function FeatureCard({ icon, color, title, desc }) {
+  return (
+    <div className="landing-feature-card">
+      <div className="landing-feature-icon" style={{ background: color }}>
+        <span>{icon}</span>
+      </div>
+      <h3>{title}</h3>
+      <p>{desc}</p>
+    </div>
+  );
+}
+
+function StepCard({ number, title, desc, color }) {
+  return (
+    <div className="landing-step-card">
+      <div className="landing-step-number" style={{ background: color }}>{number}</div>
+      <h3>{title}</h3>
+      <p>{desc}</p>
+    </div>
+  );
+}
+
+function FaqItem({ q, a }) {
+  return (
+    <details className="landing-faq-item">
+      <summary>{q}</summary>
+      <p>{a}</p>
+    </details>
+  );
+}

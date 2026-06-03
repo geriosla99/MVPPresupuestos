@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
 
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -16,17 +17,21 @@ import Perfil from './pages/Perfil';
 
 /**
  * Mapa de rutas:
+ *   /                      → Landing pública (si hay sesión, ella misma redirige a /dashboard)
  *   /login, /register      → públicas
- *   /dashboard, /ingresos, /gastos, /metas, /presupuesto → privadas (AppLayout)
- *   /                      → redirige a /dashboard (ProtectedRoute manda a /login si no hay sesión)
- *   *                      → 404 simple → /dashboard
+ *   /dashboard, /ingresos, /gastos, /metas, /presupuesto, /reportes,
+ *   /configuracion, /perfil → privadas (AppLayout)
+ *   *                      → fallback → Landing pública
  */
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Públicas */}
+          {/* Pública — landing en raíz */}
+          <Route path="/" element={<Landing />} />
+
+          {/* Públicas — autenticación */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
@@ -48,9 +53,8 @@ export default function App() {
             <Route path="/perfil" element={<Perfil />} />
           </Route>
 
-          {/* Default */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
