@@ -329,41 +329,4 @@ export default function Perfil() {
       </div>
     </div>
   );
-}
-        </p>
-
-        {delErr && <div className="alert-banner danger">⚠️ {delErr}</div>}
-
-        <div className="form-group">
-          <label htmlFor="confirm-del">
-            Escribe <strong>ELIMINAR</strong> para confirmar
-          </label>
-          <input
-            id="confirm-del"
-            type="text"
-            placeholder="ELIMINAR"
-            value={confirmText}
-            onChange={(e) => setConfirmText(e.target.value)}
-            disabled={delBusy}
-          />
-        </div>
-
-        <div className="form-actions">
-          <button
-            type="button"
-            className="btn-danger"
-            onClick={deleteAccount}
-            disabled={confirmText !== 'ELIMINAR' || delBusy}
-          >
-            {delBusy ? 'Eliminando…' : 'Eliminar mi cuenta definitivamente'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-      </div>
-    </div>
-  );
-}
-}
+}

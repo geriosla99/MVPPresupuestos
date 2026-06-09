@@ -6,6 +6,8 @@ import AppLayout from './components/AppLayout';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Privacidad from './pages/Privacidad';
+import Terminos from './pages/Terminos';
 import Dashboard from './pages/Dashboard';
 import Ingresos from './pages/Ingresos';
 import Gastos from './pages/Gastos';
@@ -34,6 +36,10 @@ export default function App() {
           {/* Públicas — autenticación */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          {/* Públicas — legales (requeridas para Play Store) */}
+          <Route path="/privacidad" element={<Privacidad />} />
+          <Route path="/terminos" element={<Terminos />} />
 
           {/* Privadas con layout */}
           <Route

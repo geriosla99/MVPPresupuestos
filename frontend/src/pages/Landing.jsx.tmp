@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import logo from '../assets/marca.png';
+import logo from '../assets/logo.png';
 import marca from '../assets/marca.png';
 import '../styles/landing.css';
 
@@ -332,10 +332,9 @@ export default function Landing() {
             <Link to="/register">Crear cuenta</Link>
           </div>
           <div>
-            <h4>Legal</h4>
-            <Link to="/privacidad">Política de Privacidad</Link>
-            <Link to="/terminos">Términos y Condiciones</Link>
+            <h4>Contacto</h4>
             <a href="mailto:hola@tupresupuesto.app">hola@tupresupuesto.app</a>
+            <span>Soporte 24/7</span>
             <span>Bogotá, Colombia</span>
           </div>
         </div>
