@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { goalsApi } from '../api/goals';
+import { summaryApi } from '../api/transactions';
 import { formatCOP, formatDate, startOfYear, maxDate } from '../utils/format';
 
 const ICONOS_METAS = ['🎯', '✈️', '🏠', '🚗', '🎓', '💍', '💻', '🏖️', '🎁', '📈'];
@@ -19,6 +20,9 @@ export default function Metas() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [balanceDisponible, setBalanceDisponible] = useState(0);
+
+  const capacidadAhorro = Math.max(0, Number(balanceDisponible) || 0);
 
   // Estado para "aportar" (suma al acumulado)
   const [contribFor, setContribFor] = useState(null); // id de la meta
@@ -43,7 +47,19 @@ export default function Metas() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  const loadBalance = async () => {
+    try {
+      const summary = await summaryApi.current();
+      setBalanceDisponible(Number(summary?.balance) || 0);
+    } catch (err) {
+      setBalanceDisponible(0);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    loadBalance();
+  }, []);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -51,6 +67,27 @@ export default function Metas() {
   const resetForm = () => {
     setForm(empty);
     setEditingId(null);
+  };
+
+  const validateCapacity = (montoObjetivo, montoActual = 0) => {
+    const objetivo = Number(montoObjetivo) || 0;
+    const actual = Number(montoActual) || 0;
+
+    if (objetivo > capacidadAhorro) {
+      setError(
+        `Tu capacidad de ahorro disponible es ${formatCOP(capacidadAhorro)}. El objetivo de la meta no puede superar ese valor.`
+      );
+      return false;
+    }
+
+    if (actual > capacidadAhorro) {
+      setError(
+        `El acumulado que registras (${formatCOP(actual)}) supera lo disponible ahora (${formatCOP(capacidadAhorro)}).`
+      );
+      return false;
+    }
+
+    return true;
   };
 
   const handleEdit = (g) => {
@@ -81,6 +118,9 @@ export default function Metas() {
     }
     if (actual < 0) {
       setError('El monto actual no puede ser negativo.');
+      return;
+    }
+    if (!validateCapacity(objetivo, actual)) {
       return;
     }
 
@@ -128,6 +168,12 @@ export default function Metas() {
       setError('Ingresa un monto válido para aportar.');
       return;
     }
+    if (monto > capacidadAhorro) {
+      setError(
+        `Solo puedes aportar hasta ${formatCOP(capacidadAhorro)} con el balance disponible actual.`
+      );
+      return;
+    }
     try {
       const updated = await goalsApi.contribute(id, monto);
       setItems((prev) => prev.map((x) => (x.id === id ? updated : x)));
@@ -147,6 +193,12 @@ export default function Metas() {
     const monto = Number(adjustMonto);
     if (adjustMonto === '' || Number.isNaN(monto) || monto < 0) {
       setError('Ingresa un acumulado válido (debe ser cero o mayor).');
+      return;
+    }
+    if (monto > capacidadAhorro) {
+      setError(
+        `El acumulado no puede superar tu capacidad de ahorro disponible (${formatCOP(capacidadAhorro)}).`
+      );
       return;
     }
     try {
@@ -171,6 +223,9 @@ export default function Metas() {
         <h3>{editingId ? 'Editar meta' : 'Nueva meta de ahorro'}</h3>
 
         {error && <div className="alert-banner danger">⚠️ {error}</div>}
+        <div className="alert-banner info">
+          💡 Capacidad de ahorro disponible: <strong>{formatCOP(capacidadAhorro)}</strong>
+        </div>
 
         <div className="form-row">
           <div className="form-group">
