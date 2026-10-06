@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { goalsApi } from '../api/goals';
 import { summaryApi } from '../api/transactions';
+import { getGoalCapacityAdvice } from '../utils/goalCapacity';
 import { formatCOP, formatDate, startOfYear, maxDate } from '../utils/format';
 
 const ICONOS_METAS = ['🎯', '✈️', '🏠', '🚗', '🎓', '💍', '💻', '🏖️', '🎁', '📈'];
@@ -23,6 +24,11 @@ export default function Metas() {
   const [balanceDisponible, setBalanceDisponible] = useState(0);
 
   const capacidadAhorro = Math.max(0, Number(balanceDisponible) || 0);
+  const capacidadAdvice = getGoalCapacityAdvice({
+    balanceDisponible: capacidadAhorro,
+    objetivo: Number(form.monto_objetivo) || 0,
+    fechaLimite: form.fecha_limite,
+  });
 
   // Estado para "aportar" (suma al acumulado)
   const [contribFor, setContribFor] = useState(null); // id de la meta
@@ -226,6 +232,11 @@ export default function Metas() {
         <div className="alert-banner info">
           💡 Capacidad de ahorro disponible: <strong>{formatCOP(capacidadAhorro)}</strong>
         </div>
+        {form.monto_objetivo && (
+          <div className="alert-banner info" style={{ marginTop: 8 }}>
+            {capacidadAdvice.message}
+          </div>
+        )}
 
         <div className="form-row">
           <div className="form-group">
@@ -371,6 +382,16 @@ export default function Metas() {
                   {pct}% completado
                   {g.fecha_limite ? ` · meta para ${formatDate(g.fecha_limite)}` : ''}
                 </div>
+
+                {g.fecha_limite && (
+                  <div className="alert-banner info" style={{ marginTop: 10, fontSize: '.75rem' }}>
+                    {getGoalCapacityAdvice({
+                      balanceDisponible: capacidadAhorro,
+                      objetivo: Number(g.monto_objetivo) || 0,
+                      fechaLimite: g.fecha_limite,
+                    }).message}
+                  </div>
+                )}
 
                 {/* Acciones */}
                 <div className="form-actions" style={{ marginTop: 12 }}>
