@@ -1,4 +1,4 @@
-import { formatDate } from './format';
+﻿import { formatDate } from './format';
 
 const currency = new Intl.NumberFormat('es-CO', {
   style: 'currency',
@@ -16,47 +16,6 @@ const diffMonths = (fromDate, toDate) => {
 
   const months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
   return Math.max(1, months || 1);
-};
-
-const normalizeMonthKey = (value) => {
-  if (!value) return '';
-
-  if (typeof value === 'string') {
-    const clean = value.trim();
-    const monthOnly = clean.match(/^\d{4}-\d{2}$/);
-    if (monthOnly) return monthOnly[0];
-
-    const dateValue = new Date(clean);
-    if (!Number.isNaN(dateValue.getTime())) {
-      return `${dateValue.getFullYear()}-${String(dateValue.getMonth() + 1).padStart(2, '0')}`;
-    }
-
-    return clean.slice(0, 7);
-  }
-
-  const dateValue = new Date(value);
-  if (Number.isNaN(dateValue.getTime())) return '';
-  return `${dateValue.getFullYear()}-${String(dateValue.getMonth() + 1).padStart(2, '0')}`;
-};
-
-const resolveMonthlyCapacity = (monthKey, monthlyCapacity = []) => {
-  if (!monthKey || !Array.isArray(monthlyCapacity) || monthlyCapacity.length === 0) {
-    return 0;
-  }
-
-  const candidate = monthlyCapacity.find((item) => {
-    const itemMonth = normalizeMonthKey(item?.month || item?.mes || item?.fecha || item?.date || item?.key);
-    return itemMonth === monthKey;
-  });
-
-  if (!candidate) return 0;
-
-  const balance = Number(candidate.balance ?? candidate.disponible ?? candidate.capacidad ?? candidate.available ?? candidate.value ?? 0) || 0;
-  if (balance > 0) return balance;
-
-  const ingresos = Number(candidate.ingresos) || 0;
-  const gastos = Number(candidate.gastos) || 0;
-  return Math.max(0, ingresos - gastos);
 };
 
 export const addMonths = (baseDate, months) => {
@@ -80,22 +39,26 @@ export const getMinimumMonthsForGoal = ({ objetivo = 0, capacidadAhorroMensual =
   return months;
 };
 
-export const getGoalMonthlyBreakdown = ({
+export const getGoalMonthlyPlan = ({
   objetivo = 0,
+  montoActual = 0,
   fechaInicio = '',
   fechaLimite = '',
-  monthlyCapacity = [],
 }) => {
   const meta = Number(objetivo) || 0;
+  const yaAhorrado = Number(montoActual) || 0;
+  const montoPendiente = Math.max(0, meta - yaAhorrado);
 
-  if (meta <= 0 || !fechaLimite) {
+  if (!fechaLimite) {
     return {
+      montoPendiente,
       mesesDisponibles: 0,
       cuotaMensual: 0,
       cuotasMensuales: [],
-      isValid: false,
-      message: 'Ingresa un monto objetivo válido y una fecha límite para validar el plazo.',
-      mesInvalido: null,
+      isValid: montoPendiente <= 0,
+      message: montoPendiente <= 0
+        ? 'La meta ya está cubierta con el ahorro actual.'
+        : 'Agrega una fecha límite para calcular el plan de ahorro.',
     };
   }
 
@@ -106,50 +69,40 @@ export const getGoalMonthlyBreakdown = ({
   goalDate.setHours(0, 0, 0, 0);
 
   const mesesDisponibles = diffMonths(startDate, goalDate);
-  const cuotaMensual = meta / mesesDisponibles;
+  const cuotaMensual = montoPendiente > 0 && mesesDisponibles > 0 ? montoPendiente / mesesDisponibles : 0;
 
-  const cuotasMensuales = [];
-  const dateCursor = new Date(startDate);
-
-  for (let index = 0; index < mesesDisponibles; index += 1) {
-    const monthDate = new Date(dateCursor);
+  const cuotasMensuales = Array.from({ length: mesesDisponibles }, (_, index) => {
+    const monthDate = new Date(startDate);
     monthDate.setMonth(monthDate.getMonth() + index);
-    const monthKey = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
-    const balanceDisponible = resolveMonthlyCapacity(monthKey, monthlyCapacity);
-    const puedeSoportar = cuotaMensual <= balanceDisponible;
 
-    cuotasMensuales.push({
-      monthKey,
+    return {
+      monthKey: `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`,
       label: monthDate.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' }),
       cuotaMensual,
-      balanceDisponible,
-      puedeSoportar,
-    });
-  }
-
-  const mesInvalido = cuotasMensuales.find((cuota) => !cuota.puedeSoportar) || null;
-  const isValid = !mesInvalido;
-
-  let message = '';
-  if (isValid) {
-    message = `La cuota requerida es ${formatCOP(cuotaMensual)} mensual durante ${mesesDisponibles} mes${mesesDisponibles === 1 ? '' : 'es'}, y cada mes tiene capacidad suficiente.`;
-  } else {
-    message = `La cuota requerida de ${formatCOP(cuotaMensual)} mensual no puede cumplirse en ${mesInvalido.label}. Ese mes solo tiene ${formatCOP(mesInvalido.balanceDisponible)} disponible; necesitas ampliar el plazo o reducir la meta.`;
-  }
+      montoPendiente,
+      requiereAhorrar: cuotaMensual,
+      esMesActual: index === 0,
+      balanceDisponible: null,
+      puedeSoportar: true,
+    };
+  });
 
   return {
+    montoPendiente,
     mesesDisponibles,
     cuotaMensual,
     cuotasMensuales,
-    isValid,
-    message,
-    mesInvalido,
+    isValid: montoPendiente <= 0 || cuotaMensual >= 0,
+    message: montoPendiente <= 0
+      ? 'La meta ya está cubierta con el ahorro actual.'
+      : `Debes ahorrar aproximadamente ${formatCOP(cuotaMensual)} al mes durante ${mesesDisponibles} mes${mesesDisponibles === 1 ? '' : 'es'}.`,
   };
 };
 
 export function getGoalCapacityAdvice({
   balanceDisponible = 0,
   objetivo = 0,
+  montoActual = 0,
   fechaLimite = '',
   capacidadAhorroMensual,
   fechaInicio = '',
@@ -157,8 +110,10 @@ export function getGoalCapacityAdvice({
 }) {
   const disponible = Number(balanceDisponible) || 0;
   const meta = Number(objetivo) || 0;
+  const yaAhorrado = Number(montoActual) || 0;
+  const montoPendiente = Math.max(0, meta - yaAhorrado);
   const hasDeadline = Boolean(fechaLimite);
-  const capacidadMensual = Number(capacidadAhorroMensual) || 0;
+  const capacidadMensual = Number(capacidadAhorroMensual) || disponible;
 
   if (meta <= 0) {
     return {
@@ -176,74 +131,19 @@ export function getGoalCapacityAdvice({
     };
   }
 
-  if (Array.isArray(monthlyCapacity) && monthlyCapacity.length > 0 && hasDeadline) {
-    const monthlyBreakdown = getGoalMonthlyBreakdown({
-      objetivo: meta,
-      fechaInicio,
-      fechaLimite,
-      monthlyCapacity,
-    });
-
-    if (monthlyBreakdown.isValid) {
-      return {
-        hasDeadline: true,
-        isValid: true,
-        puedeGuardar: true,
-        montoMaximoPorMes: monthlyBreakdown.cuotaMensual,
-        ahorroMensualRequerido: monthlyBreakdown.cuotaMensual,
-        mesesRestantes: monthlyBreakdown.mesesDisponibles,
-        necesitaAlargarTiempo: false,
-        requiereAjusteFecha: false,
-        fechaAjustada: '',
-        cuotasMensuales: monthlyBreakdown.cuotasMensuales,
-        message: monthlyBreakdown.message,
-      };
-    }
-
-    return {
-      hasDeadline: true,
-      isValid: false,
-      puedeGuardar: false,
-      montoMaximoPorMes: Math.max(0, capacidadMensual),
-      ahorroMensualRequerido: monthlyBreakdown.cuotaMensual,
-      mesesRestantes: monthlyBreakdown.mesesDisponibles,
-      necesitaAlargarTiempo: true,
-      requiereAjusteFecha: true,
-      fechaAjustada: '',
-      cuotasMensuales: monthlyBreakdown.cuotasMensuales,
-      message: monthlyBreakdown.message,
-    };
-  }
-
-  if (meta > disponible) {
+  if (montoPendiente <= 0) {
     return {
       hasDeadline,
-      isValid: false,
-      puedeGuardar: false,
+      isValid: true,
+      puedeGuardar: true,
       montoMaximoPorMes: Math.max(0, capacidadMensual),
-      ahorroMensualRequerido: meta,
+      ahorroMensualRequerido: 0,
       mesesRestantes: hasDeadline ? diffMonths(new Date(), new Date(fechaLimite)) : 0,
       necesitaAlargarTiempo: false,
       requiereAjusteFecha: false,
       fechaAjustada: '',
       cuotasMensuales: [],
-      message: 'El monto de la meta no puede superar tu balance disponible.',
-    };
-  }
-
-  if (capacidadMensual <= 0) {
-    return {
-      hasDeadline,
-      isValid: false,
-      puedeGuardar: false,
-      montoMaximoPorMes: 0,
-      ahorroMensualRequerido: hasDeadline ? meta / Math.max(1, diffMonths(new Date(), new Date(fechaLimite))) : meta,
-      mesesRestantes: hasDeadline ? diffMonths(new Date(), new Date(fechaLimite)) : 0,
-      necesitaAlargarTiempo: false,
-      requiereAjusteFecha: false,
-      fechaAjustada: '',
-      cuotasMensuales: [],
-      message: 'Actualmente no existe capacidad de ahorro suficiente para establecer esa meta.',
+      message: 'La meta ya está cubierta con el ahorro actual.',
     };
   }
 
@@ -252,55 +152,77 @@ export function getGoalCapacityAdvice({
       hasDeadline: false,
       isValid: true,
       puedeGuardar: true,
-      montoMaximoPorMes: capacidadMensual,
+      montoMaximoPorMes: Math.max(0, capacidadMensual),
       ahorroMensualRequerido: 0,
       mesesRestantes: 0,
       necesitaAlargarTiempo: false,
       requiereAjusteFecha: false,
       fechaAjustada: '',
       cuotasMensuales: [],
-      message: `Con tu balance disponible de ${formatCOP(disponible)}, tu meta de ${formatCOP(meta)} no excede la capacidad de ahorro actual.`,
+      message: `Con tu balance disponible de ${formatCOP(disponible)}, tu meta de ${formatCOP(meta)} todavía requiere ${formatCOP(montoPendiente)} por alcanzar.`,
     };
   }
 
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-
-  const fechaObjetivo = new Date(fechaLimite);
-  const mesesRestantes = diffMonths(hoy, fechaObjetivo);
-  const montoMaximoPorMes = Math.max(0, capacidadMensual);
-  const ahorroMensualRequerido = Math.max(0, meta / mesesRestantes);
-  const necesitaAlargarTiempo = ahorroMensualRequerido > montoMaximoPorMes;
-  const mesesNecesarios = getMinimumMonthsForGoal({
+  const plan = getGoalMonthlyPlan({
     objetivo: meta,
-    capacidadAhorroMensual: montoMaximoPorMes,
+    montoActual: yaAhorrado,
+    fechaInicio,
+    fechaLimite,
   });
-  const fechaAjustada = necesitaAlargarTiempo
-    ? addMonths(hoy, mesesNecesarios).toISOString().slice(0, 10)
-    : '';
 
-  const isValid = !necesitaAlargarTiempo;
+  const cuotaMensual = plan.cuotaMensual;
+  const capacidadActual = Math.max(0, disponible);
+  const esValida = cuotaMensual <= capacidadActual;
 
-  let message = '';
+  if (!plan.cuotasMensuales.length) {
+    return {
+      hasDeadline: true,
+      isValid: false,
+      puedeGuardar: false,
+      montoMaximoPorMes: capacidadActual,
+      ahorroMensualRequerido: cuotaMensual,
+      mesesRestantes: 0,
+      necesitaAlargarTiempo: false,
+      requiereAjusteFecha: false,
+      fechaAjustada: '',
+      cuotasMensuales: [],
+      message: 'No fue posible calcular el plan de ahorro para esta fecha límite.',
+    };
+  }
 
-  if (isValid) {
-    message = `Con un balance disponible de ${formatCOP(disponible)} y ${mesesRestantes} mes${mesesRestantes === 1 ? '' : 'es'} para cumplirla, puedes ahorrar hasta ${formatCOP(montoMaximoPorMes)} por mes. Tu meta requiere ${formatCOP(ahorroMensualRequerido)} al mes, y está dentro de la capacidad.`;
-  } else {
-    message = `Tu meta requiere ${formatCOP(ahorroMensualRequerido)} al mes, pero tu capacidad actual es ${formatCOP(montoMaximoPorMes)}. Ajustamos la fecha propuesta a ${formatDate(fechaAjustada)} para mantenerla viable.`;
+  const cuotasMensuales = plan.cuotasMensuales.map((cuota, index) => ({
+    ...cuota,
+    balanceDisponible: index === 0 ? capacidadActual : null,
+    puedeSoportar: index > 0 || cuota.cuotaMensual <= capacidadActual,
+  }));
+
+  if (esValida) {
+    return {
+      hasDeadline: true,
+      isValid: true,
+      puedeGuardar: true,
+      montoMaximoPorMes: capacidadActual,
+      ahorroMensualRequerido: cuotaMensual,
+      mesesRestantes: plan.mesesDisponibles,
+      necesitaAlargarTiempo: false,
+      requiereAjusteFecha: false,
+      fechaAjustada: '',
+      cuotasMensuales,
+      message: `Debes ahorrar aproximadamente ${formatCOP(cuotaMensual)} al mes durante ${plan.mesesDisponibles} mes${plan.mesesDisponibles === 1 ? '' : 'es'}. Tu capacidad actual es ${formatCOP(capacidadActual)} y cumple con la cuota requerida.`,
+    };
   }
 
   return {
     hasDeadline: true,
-    isValid,
-    puedeGuardar: isValid,
-    montoMaximoPorMes,
-    ahorroMensualRequerido,
-    mesesRestantes,
-    necesitaAlargarTiempo,
-    requiereAjusteFecha: necesitaAlargarTiempo,
-    fechaAjustada,
-    mesesNecesarios,
-    cuotasMensuales: [],
-    message,
+    isValid: false,
+    puedeGuardar: false,
+    montoMaximoPorMes: capacidadActual,
+    ahorroMensualRequerido: cuotaMensual,
+    mesesRestantes: plan.mesesDisponibles,
+    necesitaAlargarTiempo: true,
+    requiereAjusteFecha: true,
+    fechaAjustada: '',
+    cuotasMensuales,
+    message: `La cuota requerida de ${formatCOP(cuotaMensual)} supera tu capacidad de ahorro actual de ${formatCOP(capacidadActual)}. Puedes reducir la meta o ampliar el plazo.`,
   };
 }

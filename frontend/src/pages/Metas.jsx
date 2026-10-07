@@ -22,17 +22,16 @@ export default function Metas() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [balanceDisponible, setBalanceDisponible] = useState(0);
-  const [monthlyCapacity, setMonthlyCapacity] = useState([]);
 
   const capacidadAhorro = Math.max(0, Number(balanceDisponible) || 0);
   const capacidadAhorroMensual = capacidadAhorro;
   const goalValidation = getGoalCapacityAdvice({
     balanceDisponible: capacidadAhorro,
     objetivo: Number(form.monto_objetivo) || 0,
+    montoActual: Number(form.monto_actual) || 0,
     fechaLimite: form.fecha_limite,
     capacidadAhorroMensual,
     fechaInicio: new Date().toISOString().slice(0, 10),
-    monthlyCapacity,
   });
   const capacidadAdvice = goalValidation;
   const puedeGuardarMeta = Boolean(form.nombre.trim()) && Number(form.monto_objetivo) > 0 && goalValidation.isValid;
@@ -62,22 +61,10 @@ export default function Metas() {
 
   const loadBalance = async () => {
     try {
-      const [summary, monthlySummary] = await Promise.all([
-        summaryApi.current(),
-        summaryApi.monthly(12),
-      ]);
-
-      const historicMonthly = Array.isArray(monthlySummary) ? monthlySummary : [];
-      const normalizedMonthlyCapacity = historicMonthly.map((item) => ({
-        month: item?.month || item?.mes || item?.fecha || item?.date || '',
-        balance: Number(item?.balance ?? ((Number(item?.ingresos) || 0) - (Number(item?.gastos) || 0))),
-      }));
-
+      const summary = await summaryApi.current();
       setBalanceDisponible(Number(summary?.balance) || 0);
-      setMonthlyCapacity(normalizedMonthlyCapacity);
     } catch (err) {
       setBalanceDisponible(0);
-      setMonthlyCapacity([]);
     }
   };
 
@@ -115,10 +102,10 @@ export default function Metas() {
     const validation = getGoalCapacityAdvice({
       balanceDisponible: capacidadAhorro,
       objetivo,
+      montoActual: Number(form.monto_actual) || 0,
       fechaLimite: form.fecha_limite,
       capacidadAhorroMensual,
       fechaInicio: new Date().toISOString().slice(0, 10),
-      monthlyCapacity,
     });
 
     if (!validation.isValid) {
@@ -279,11 +266,12 @@ export default function Metas() {
         )}
         {Array.isArray(goalValidation.cuotasMensuales) && goalValidation.cuotasMensuales.length > 0 && (
           <div className="alert-banner info" style={{ marginTop: 8 }}>
-            <div style={{ fontWeight: 700, marginBottom: 6 }}>Cuotas mensuales</div>
+            <div style={{ fontWeight: 700, marginBottom: 6 }}>Plan de ahorro</div>
             <ul style={{ margin: 0, paddingLeft: 18 }}>
               {goalValidation.cuotasMensuales.map((cuota) => (
                 <li key={cuota.monthKey}>
-                  {cuota.label}: {formatCOP(cuota.cuotaMensual)} / mes · disponible {formatCOP(cuota.balanceDisponible)} {cuota.puedeSoportar ? '✓' : '✕'}
+                  {cuota.label}: ahorrar {formatCOP(cuota.cuotaMensual)}
+                  {cuota.esMesActual ? ` ⚠️ Capacidad actual: ${formatCOP(cuota.balanceDisponible ?? capacidadAhorro)}` : ''}
                 </li>
               ))}
             </ul>
@@ -440,9 +428,9 @@ export default function Metas() {
                     {getGoalCapacityAdvice({
                       balanceDisponible: capacidadAhorro,
                       objetivo: Number(g.monto_objetivo) || 0,
+                      montoActual: Number(g.monto_actual) || 0,
                       fechaLimite: g.fecha_limite,
                       fechaInicio: new Date().toISOString().slice(0, 10),
-                      monthlyCapacity,
                     }).message}
                   </div>
                 )}
