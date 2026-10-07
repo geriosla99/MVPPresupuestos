@@ -24,11 +24,15 @@ export default function Metas() {
   const [balanceDisponible, setBalanceDisponible] = useState(0);
 
   const capacidadAhorro = Math.max(0, Number(balanceDisponible) || 0);
-  const capacidadAdvice = getGoalCapacityAdvice({
+  const capacidadAhorroMensual = capacidadAhorro;
+  const goalValidation = getGoalCapacityAdvice({
     balanceDisponible: capacidadAhorro,
     objetivo: Number(form.monto_objetivo) || 0,
     fechaLimite: form.fecha_limite,
+    capacidadAhorroMensual,
   });
+  const capacidadAdvice = goalValidation;
+  const puedeGuardarMeta = Boolean(form.nombre.trim()) && Number(form.monto_objetivo) > 0 && goalValidation.isValid;
 
   // Estado para "aportar" (suma al acumulado)
   const [contribFor, setContribFor] = useState(null); // id de la meta
@@ -67,8 +71,24 @@ export default function Metas() {
     loadBalance();
   }, []);
 
-  const handleChange = (e) =>
+  useEffect(() => {
+    if (!form.fecha_limite || !form.monto_objetivo) return;
+
+    const objetivo = Number(form.monto_objetivo) || 0;
+    if (objetivo <= 0) return;
+
+    if (goalValidation.fechaAjustada && goalValidation.fechaAjustada !== form.fecha_limite) {
+      setForm((prev) => ({
+        ...prev,
+        fecha_limite: goalValidation.fechaAjustada,
+      }));
+    }
+  }, [form.monto_objetivo, form.fecha_limite, goalValidation.fechaAjustada]);
+
+  const handleChange = (e) => {
+    setError(null);
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const resetForm = () => {
     setForm(empty);
@@ -81,8 +101,25 @@ export default function Metas() {
 
     if (objetivo > capacidadAhorro) {
       setError(
-        `Tu capacidad de ahorro disponible es ${formatCOP(capacidadAhorro)}. El objetivo de la meta no puede superar ese valor.`
+        'El monto de la meta no puede superar tu balance disponible.'
       );
+      return false;
+    }
+
+    if (capacidadAhorroMensual <= 0) {
+      setError('Actualmente no existe capacidad de ahorro suficiente para establecer esa meta.');
+      return false;
+    }
+
+    const validation = getGoalCapacityAdvice({
+      balanceDisponible: capacidadAhorro,
+      objetivo,
+      fechaLimite: form.fecha_limite,
+      capacidadAhorroMensual,
+    });
+
+    if (!validation.isValid) {
+      setError(validation.message);
       return false;
     }
 
@@ -237,6 +274,11 @@ export default function Metas() {
             {capacidadAdvice.message}
           </div>
         )}
+        {goalValidation.fechaAjustada && form.fecha_limite && (
+          <div className="alert-banner info" style={{ marginTop: 8 }}>
+            Fecha ajustada automáticamente a {formatDate(goalValidation.fechaAjustada)} para mantener la cuota mensual viable.
+          </div>
+        )}
 
         <div className="form-row">
           <div className="form-group">
@@ -315,7 +357,7 @@ export default function Metas() {
         </div>
 
         <div className="form-actions">
-          <button className="btn-primary" type="submit" disabled={submitting}>
+          <button className="btn-primary" type="submit" disabled={submitting || !puedeGuardarMeta}>
             {submitting ? 'Guardando…' : editingId ? 'Guardar cambios' : 'Crear meta'}
           </button>
           {editingId && (
