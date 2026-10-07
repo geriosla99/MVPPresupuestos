@@ -86,23 +86,24 @@ export default function Metas() {
   const validateCapacity = (montoObjetivo, montoActual = 0) => {
     const objetivo = Number(montoObjetivo) || 0;
     const actual = Number(montoActual) || 0;
-
-    if (objetivo > capacidadAhorro) {
-      setError(
-        'El monto de la meta no puede superar tu balance disponible.'
-      );
-      return false;
-    }
+    const pendiente = Math.max(0, objetivo - actual);
 
     if (capacidadAhorroMensual <= 0) {
       setError('Actualmente no existe capacidad de ahorro suficiente para establecer esa meta.');
       return false;
     }
 
+    if (pendiente > capacidadAhorro) {
+      setError(
+        `Aún faltan ${formatCOP(pendiente)} por ahorrar y eso supera tu capacidad disponible actual de ${formatCOP(capacidadAhorro)}.`
+      );
+      return false;
+    }
+
     const validation = getGoalCapacityAdvice({
       balanceDisponible: capacidadAhorro,
       objetivo,
-      montoActual: Number(form.monto_actual) || 0,
+      montoActual: actual,
       fechaLimite: form.fecha_limite,
       capacidadAhorroMensual,
       fechaInicio: new Date().toISOString().slice(0, 10),
@@ -110,13 +111,6 @@ export default function Metas() {
 
     if (!validation.isValid) {
       setError(validation.message);
-      return false;
-    }
-
-    if (actual > capacidadAhorro) {
-      setError(
-        `El acumulado que registras (${formatCOP(actual)}) supera lo disponible ahora (${formatCOP(capacidadAhorro)}).`
-      );
       return false;
     }
 
