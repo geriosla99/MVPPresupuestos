@@ -70,4 +70,56 @@ describe('getGoalCapacityAdvice', () => {
     expect(advice.mesesNecesarios).toBeGreaterThanOrEqual(6);
     expect(advice.fechaAjustada).not.toBe('');
   });
+
+  it('permite guardar cuando cada mes del periodo tiene capacidad suficiente', () => {
+    const now = new Date();
+    const futureDate = addMonths(now, 5);
+    const monthKeys = Array.from({ length: 5 }, (_, index) => {
+      const date = addMonths(now, index);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    });
+
+    const advice = getGoalCapacityAdvice({
+      balanceDisponible: 300000,
+      objetivo: 1000000,
+      fechaLimite: futureDate.toISOString().slice(0, 10),
+      capacidadAhorroMensual: 300000,
+      fechaInicio: now.toISOString().slice(0, 10),
+      monthlyCapacity: monthKeys.map((month, index) => ({
+        month,
+        balance: [300000, 250000, 300000, 280000, 320000][index],
+      })),
+    });
+
+    expect(advice.isValid).toBe(true);
+    expect(advice.puedeGuardar).toBe(true);
+    expect(advice.cuotasMensuales.every((cuota) => cuota.puedeSoportar)).toBe(true);
+    expect(advice.cuotasMensuales[0].cuotaMensual).toBe(200000);
+  });
+
+  it('bloquea la meta cuando al menos un mes del periodo no alcanza la cuota necesaria', () => {
+    const now = new Date();
+    const futureDate = addMonths(now, 4);
+    const monthKeys = Array.from({ length: 4 }, (_, index) => {
+      const date = addMonths(now, index);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    });
+
+    const advice = getGoalCapacityAdvice({
+      balanceDisponible: 250000,
+      objetivo: 800000,
+      fechaLimite: futureDate.toISOString().slice(0, 10),
+      capacidadAhorroMensual: 250000,
+      fechaInicio: now.toISOString().slice(0, 10),
+      monthlyCapacity: monthKeys.map((month, index) => ({
+        month,
+        balance: [300000, 250000, 180000, 300000][index],
+      })),
+    });
+
+    expect(advice.isValid).toBe(false);
+    expect(advice.puedeGuardar).toBe(false);
+    expect(advice.cuotasMensuales.some((cuota) => !cuota.puedeSoportar)).toBe(true);
+    expect(advice.message).toMatch(/no.*permite|mes|capacidad/i);
+  });
 });
