@@ -1,5 +1,3 @@
-﻿import { formatDate } from './format';
-
 const currency = new Intl.NumberFormat('es-CO', {
   style: 'currency',
   currency: 'COP',
